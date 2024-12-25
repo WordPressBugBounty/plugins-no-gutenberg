@@ -3,7 +3,7 @@
  * Plugin Name: No Gutenberg - Disable Blocks Editor and Global Styles - Back to Classic Editor
  * Plugin URI: https://servicios.ayudawp.com/
  * Description: Don't you want the new Gutenberg Block editor bundled with WordPress 5.x for compatibility reasons and FSE Global Styles for optimization? Simply get rid of them! Install this plugin prior update to WordPress 5.x, activate and … That's all!
- * Version: 1.0.9
+ * Version: 1.1.0
  * Author: Fernando Tellado
  * Author URI: https://tellado.es/
  *
@@ -33,16 +33,6 @@ function no_gutenberg_init() {
 	load_plugin_textdomain( 'no-gutenberg', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 add_action( 'plugins_loaded', 'no_gutenberg_init' );
-
-// Fix for the Categories postbox for WP 6.7.1.
-	global $wp_version;
-	if ( '6.7.1' === $wp_version && is_admin() ) {
-	add_action( 'wp_default_scripts', array( __CLASS__, 'replace_post_js' ), 11 );
-	}
-	if ( ! $block_editor && ! $gutenberg  ) {
-	return;
-	}
-	if ( $settings['allow-users'] ) 
 
 /* THE NO GUTEMBERG KILLER FILTER
 * The plugin checks if gutenberg editor is activated, what version is active

@@ -62,6 +62,9 @@ Nope. I'll expect Matt and all the rest of this beauty guys to abandon the idea 
 2. WordPress posts page after plugin activation.
 
 == Changelog ==
+= 1.1.0 =
+* Fix Fatal Error with prior version
+
 = 1.0.9 =
 * Tested up to WordPress 6.7.1
 
