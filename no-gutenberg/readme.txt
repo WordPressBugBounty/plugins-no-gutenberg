@@ -4,7 +4,7 @@ Donate link: https://www.paypal.me/fernandotellado
 Tags: gutenberg, editor, classic editor, block editor, disable gutenberg, gutenfree, global styles, fse 
 Requires at least: 4.9
 Requires PHP: 5.6
-Tested up to: 6.6.2
+Tested up to: 6.7.1
 Stable tag: trunk
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -62,6 +62,9 @@ Nope. I'll expect Matt and all the rest of this beauty guys to abandon the idea 
 2. WordPress posts page after plugin activation.
 
 == Changelog ==
+= 1.0.9 =
+* Tested up to WordPress 6.7.1
+
 = 1.0.8 =
 * Tested up to WordPress 6.6.2
 
