@@ -1,67 +1,119 @@
-=== No Gutenberg - Disable Gutenberg Blocks Editor and FSE Global Styles ===
-Contributors: fernandot
-Donate link: https://www.paypal.me/fernandotellado
-Tags: gutenberg, editor, classic editor, block editor, disable gutenberg, gutenfree, global styles, fse 
+=== No Gutenberg - Disable Blocks Editor and Global Styles - Back to Classic Editor ===
+Contributors: fernandot, ayudawp
+Tags: gutenberg, classic editor, FSE, blocks, woocommerce
 Requires at least: 4.9
-Requires PHP: 5.6
-Tested up to: 6.7.1
-Stable tag: trunk
+Requires PHP: 7.4
+Tested up to: 6.8
+Stable tag: 2.0
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Disable the Gutenberg Block Editor and FSE Global Styles
+Complete elimination of Gutenberg Block Editor, FSE Global Styles, Block Widgets, Patterns, and WooCommerce blocks. Back to Classic Editor.
 
 == Description ==
 
-WordPress 5.x bundled a new block editor called Gutenberg. With 5.9 version were added the called global styles for Full Site Editing (FSE) that load a lot of inline styles in every page. Despite his benefits, mainly for compatibility reasons with other plugins and previous contents, there are a lot of users that don't want to activate it yet. If you don't want the Gutenberg Block Editor and FSE Global Styles in your WordPress install right now, simply install this plugin, activate it and … That's all!
+The most comprehensive solution to completely remove Gutenberg Block Editor and all its related features from your WordPress installation. This plugin doesn't just disable the block editor - it eliminates every trace of block-related functionality for maximum performance and compatibility.
 
-What does this plugin does?:
+**What this plugin removes:**
 
-* Disables totally the Gutenberg Block Editor
-* Disables totally the Full Site Editing (FSE) Global Styles added inline to every page
-* Shows and use by default the cool and compatible with everything WordPress Classic Editor
-* Plus: Disables the WP 4.9.8 "Try Gutenberg" callout Dashboard widget
+= Core Gutenberg Features =
+* Gutenberg Block Editor (completely disabled)
+* Full Site Editing (FSE) Global Styles and inline CSS
+* Block-based Widget Editor (reverts to Classic Widgets)
+* Block Patterns and Pattern Directory
+* Theme.json support and processing
+* Block Directory integration
+* Site Editor functionality
 
-<strong>No options</strong>. Just install & activate the plugin prior to update to WordPress 5.x and you that's all. You'll get WordPress 5.x but without the Gutenberg Block Editor.
+= Performance Optimizations =
+* Removes all block-related CSS and JavaScript files
+* Eliminates Global Styles inline CSS on every page
+* Removes unused block library assets
+* Disables block editor admin assets
+* Removes duotone and layout support filters
 
-== Plugin Requirements ==
-* This plugin requires WordPress 4.9 or greater with the Gutenberg Plugin installed and activated (for testing purposes) or WordPress 5.0 or greater
-* This plugin requires PHP 5.6 or greater
+= WooCommerce Integration =
+* Disables WooCommerce block-based checkout and cart
+* Removes WooCommerce block editor for products
+* Eliminates WooCommerce block assets and styles
+* Forces classic WooCommerce experience
 
+= Admin Experience =
+* Removes "Try Gutenberg" dashboard widgets
+* Disables Gutenberg-related admin menus
+* Shows activation success notice
+* Adds support link to plugin actions
+
+**Zero Configuration Required** - Simply activate the plugin and everything is automatically disabled. No settings page needed because it just works!
+
+This plugin is perfect for:
+- Users who prefer the Classic Editor
+- Sites requiring maximum compatibility with legacy themes and plugins
+- Performance-focused installations
+- Users who want to eliminate block-related overhead completely
 
 == Installation ==
 
-1. Go to your WP Dashboard > Plugins and search for ‘no gutenberg’ or…
-2. Download the plugin from WP repository.
-3. Upload the ‘no-gutenberg’ folder to the '/wp-content/plugins/' directory
-2. Activate the plugin through the 'Plugins' menu in WordPress
+1. Go to your WP Dashboard > Plugins and search for 'no gutenberg' or…
+2. Download the plugin from WP repository
+3. Upload the 'no-gutenberg' folder to the '/wp-content/plugins/' directory
+4. Activate the plugin through the 'Plugins' menu in WordPress
+5. That's it! Gutenberg is completely gone and Classic Editor is restored
 
 == Frequently Asked Questions ==
 
-= Do you hate the Gutenberg Editor? =
+= What's new in version 2.0? =
 
-No, I don't. I think that is more important to decide what you want in your WordPress and what not. If you don't want to make this huge step to the new Gutenberg Editor with this plugin you'll have de decision in your hands.
+Version 2.0 is a complete rewrite that eliminates ALL block-related functionality:
+- Removes FSE Global Styles and theme.json support
+- Disables block-based widgets completely
+- Removes block patterns and block directory
+- Eliminates WooCommerce blocks if WooCommerce is installed
+- Removes all block-related CSS and JavaScript assets
+- Much better performance and more thorough removal
 
-= What happens if I decide to deactivate the plugin? =
+= Does this work with WooCommerce? =
 
-* You'll recover the brand new Gutenberg Editor
-* Your life will be a little more difficult from that moment :)
-  
-= Something went wrong after activation =
+Yes! The plugin automatically detects WooCommerce and disables all WooCommerce blocks, forcing the classic checkout, cart, and product editor experience.
 
-This plugin is compatible with all WordPress JavaScript functions (`wp_localize_script()`, js in header, in footer...) and works with all well coded plugins and themes. If a plugin or a theme is not properly enqueuing scripts, your site may not work. If your host doesn’t support any of the tweaks, usually due to security restrictions, is possible that something fails. If anything fails please access to your <code>/wp-content/plugins/no-gutenberg/</code> directory via your favourite FTP client or hosting panel (cPanel, Plesk, etc.) and rename the plugin folder to deactivate it.
+= Will this break my existing content? =
 
-= What’s next? =
+No. Your existing posts and pages will continue to work normally. The plugin only affects the editing experience and removes block-related overhead.
 
-Nope. I'll expect Matt and all the rest of this beauty guys to abandon the idea that a blocks editor is a good idea for post editing.
+= What happens if I deactivate the plugin? =
 
+All Gutenberg functionality will be restored immediately. Your site will return to using the block editor and all block-related features.
+
+= Is this compatible with all themes and plugins? =
+
+Yes. This plugin is designed for maximum compatibility. It works with all properly coded themes and plugins by simply removing block functionality rather than conflicting with it.
+
+= Why choose this over other similar plugins? =
+
+This plugin is the most comprehensive solution available. While other plugins only disable the editor, this one removes ALL block-related functionality including FSE styles, widgets, patterns, WooCommerce blocks, and performance-heavy assets.
 
 == Screenshots ==
 
-1. WordPress posts page before plugin activation.
-2. WordPress posts page after plugin activation.
+1. WordPress posts page with Classic Editor restored
+2. Classic Widgets interface instead of block widgets
+3. Activation success notice
+4. FSE theme activation warning
 
 == Changelog ==
+
+= 2.0 =
+* Complete plugin rewrite with object-oriented approach
+* Added removal of FSE Global Styles and theme.json support
+* Disabled block-based widgets completely
+* Removed block patterns and block directory
+* Added WooCommerce blocks removal
+* Eliminated all block-related CSS and JavaScript assets
+* Added activation notice and support links
+* Improved performance by removing more block overhead
+* Better code organization and security
+* Updated minimum PHP requirement to 7.4
+* Network/Multisite compatible
+
 = 1.1.0 =
 * Fix Fatal Error with prior version
 
@@ -89,54 +141,8 @@ Nope. I'll expect Matt and all the rest of this beauty guys to abandon the idea 
 = 1.0.2 =
 * Added the action to remove the FSE Global Styles
 
-= 1.0.12 =
-* Tested up to WordPress 5.9
-
-= 1.0.11 =
-* Tested up to WordPress 5.8
-
-= 1.0.10 =
-* Tested up to WordPress 5.6
-
-= 1.0.9 =
-* Tested up to WordPress 5.5.1
-
-= 1.0.8 =
-* Tested up to WordPress 5.5
-
-= 1.0.7 =
-* Tested up to WordPress 5.4.1
-
-= 1.0.6 =
-* Tested up to WordPress 5.4
-
-= 1.0.5 =
-* Tested up to WordPress 5.3.2
-
-= 1.0.5 =
-* Tested up to WordPress 5.3 (And it works!)
-
-= 1.0.4 =
-* Tested up to WordPress 5.2.2
-
-= 1.0.3 =
-* Tested up to WordPress 5.2
-
-= 1.0.2 =
-* Tested up to WordPress 5.1
-
 = 1.0.1 =
 * Better and simply readme file
 
 = 1.0.0 =
-* Now it works great with all Gutenberg Block Editor versions (plugin and core) 
-* New conditional filters added to check Gutenberg version before apply the proper function to disable the Block Editor. 
-
-= 0.9.2 =
-* Tested up to WordPress 5.0 tag added
-
-= 0.9.1 =
-* Function added to disable the "Try Gutenberg" callout Dashboard widget introduced in WP 4.9.8
-
-= 0.9 =
-* Initial release, and hopefully latest
+* Initial release with basic Gutenberg removal
