@@ -3,7 +3,7 @@
  * Plugin Name: No Gutenberg - Disable Blocks Editor and Global Styles - Back to Classic Editor
  * Plugin URI: https://servicios.ayudawp.com/
  * Description: Complete elimination of Gutenberg Block Editor, FSE Global Styles, Block Widgets, Patterns, and WooCommerce blocks. Get back to the reliable Classic Editor with zero block-related overhead.
- * Version: 2.0
+ * Version: 2.1.1
  * Author: Fernando Tellado
  * Author URI: https://ayudawp.com/
  *
@@ -13,7 +13,7 @@
  * Text Domain: no-gutenberg
  * Requires at least: 4.9
  * Requires PHP: 7.4
- * Tested up to: 6.8
+ * Tested up to: 6.9
  *
  * No Gutenberg plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ class AyudaWP_No_Gutenberg {
     /**
      * Plugin version
      */
-    const VERSION = '2.0.0';
+    const VERSION = '2.1.1';
 
     /**
      * Initialize the plugin
@@ -66,6 +66,12 @@ class AyudaWP_No_Gutenberg {
         
         // Remove Gutenberg dashboard widgets and admin features
         add_action( 'wp_dashboard_setup', array( __CLASS__, 'ayudawp_remove_dashboard_widgets' ) );
+        
+        // Remove Site Editor and Patterns admin menus (WP 6.5+)
+        add_action( 'admin_menu', array( __CLASS__, 'ayudawp_remove_site_editor_menus' ), 999 );
+        
+        // Block direct access to Site Editor
+        add_action( 'current_screen', array( __CLASS__, 'ayudawp_block_site_editor_access' ) );
         
         // Disable WooCommerce blocks if WooCommerce is active
         add_action( 'init', array( __CLASS__, 'ayudawp_disable_woocommerce_blocks' ) );
@@ -223,6 +229,33 @@ class AyudaWP_No_Gutenberg {
         
         // Remove "Welcome" panel that promotes Gutenberg
         remove_action( 'welcome_panel', 'wp_welcome_panel' );
+    }
+
+    /**
+     * Remove Site Editor and Patterns admin menus
+     * Since WP 6.5+, Patterns submenu is shown even for classic themes
+     */
+    public static function ayudawp_remove_site_editor_menus() {
+        // Remove Site Editor menu (for block themes)
+        remove_submenu_page( 'themes.php', 'site-editor.php' );
+        
+        // Remove Patterns submenu (added in WP 6.5+ for all themes)
+        remove_submenu_page( 'themes.php', 'site-editor.php?path=/patterns' );
+        
+        // Also remove the wp_block post type edit link if present
+        remove_submenu_page( 'themes.php', 'edit.php?post_type=wp_block' );
+    }
+
+    /**
+     * Block direct access to Site Editor pages
+     *
+     * @param WP_Screen $screen Current screen object.
+     */
+    public static function ayudawp_block_site_editor_access( $screen ) {
+        if ( 'site-editor' === $screen->id && ! headers_sent() ) {
+            wp_safe_redirect( admin_url() );
+            exit;
+        }
     }
 
     /**

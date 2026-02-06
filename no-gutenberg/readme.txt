@@ -3,8 +3,8 @@ Contributors: fernandot, ayudawp
 Tags: gutenberg, classic editor, FSE, blocks, woocommerce
 Requires at least: 4.9
 Requires PHP: 7.4
-Tested up to: 6.8
-Stable tag: 2.0
+Tested up to: 6.9
+Stable tag: 2.1.1
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,8 @@ The most comprehensive solution to completely remove Gutenberg Block Editor and 
 = Admin Experience =
 * Removes "Try Gutenberg" dashboard widgets
 * Disables Gutenberg-related admin menus
+* Removes Patterns submenu from Appearance menu (WP 6.5+)
+* Blocks access to Site Editor pages
 * Shows activation success notice
 * Adds support link to plugin actions
 
@@ -101,6 +103,18 @@ This plugin is the most comprehensive solution available. While other plugins on
 
 == Changelog ==
 
+= 2.1.1 =
+* Fixed headers already sent error on plugin activation
+
+= 2.1.0 =
+* Added removal of Patterns submenu from Appearance menu (introduced in WP 6.5+ for all themes)
+* Added removal of Site Editor submenu
+* Added blocking of direct access to Site Editor pages
+* Better compatibility with WordPress 6.5+ changes
+
+= 2.0.1 =
+* Tested up to WordPress 6.9
+
 = 2.0 =
 * Complete plugin rewrite with object-oriented approach
 * Added removal of FSE Global Styles and theme.json support
@@ -146,3 +160,17 @@ This plugin is the most comprehensive solution available. While other plugins on
 
 = 1.0.0 =
 * Initial release with basic Gutenberg removal
+
+== Support ==
+
+= Need help or have suggestions? =
+* [Official website](https://servicios.ayudawp.com/)
+* [WordPress support forum](https://wordpress.org/support/plugin/no-gutenberg/)
+* [YouTube channel](https://www.youtube.com/AyudaWordPressES)
+* [Documentation and tutorials](https://ayudawp.com/)
+
+**Love the plugin?** Please leave us a 5-star review and help spread the word!
+
+== About AyudaWP ==
+
+We are specialists in WordPress security, SEO, and performance optimization plugins. We create tools that solve real problems for WordPress site owners while maintaining the highest coding standards and accessibility requirements.
