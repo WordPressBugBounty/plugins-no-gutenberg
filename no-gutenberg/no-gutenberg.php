@@ -3,7 +3,7 @@
  * Plugin Name: No Gutenberg - Disable Blocks Editor and Global Styles - Back to Classic Editor
  * Plugin URI: https://servicios.ayudawp.com/
  * Description: Complete elimination of Gutenberg Block Editor, FSE Global Styles, Block Widgets, Patterns, and WooCommerce blocks. Get back to the reliable Classic Editor with zero block-related overhead.
- * Version: 2.1.1
+ * Version: 2.1.2
  * Author: Fernando Tellado
  * Author URI: https://ayudawp.com/
  *
@@ -13,7 +13,7 @@
  * Text Domain: no-gutenberg
  * Requires at least: 4.9
  * Requires PHP: 7.4
- * Tested up to: 6.9
+ * Tested up to: 7.0
  *
  * No Gutenberg plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ class AyudaWP_No_Gutenberg {
     /**
      * Plugin version
      */
-    const VERSION = '2.1.1';
+    const VERSION = '2.1.2';
 
     /**
      * Initialize the plugin

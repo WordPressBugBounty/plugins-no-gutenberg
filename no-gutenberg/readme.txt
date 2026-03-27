@@ -3,8 +3,8 @@ Contributors: fernandot, ayudawp
 Tags: gutenberg, classic editor, FSE, blocks, woocommerce
 Requires at least: 4.9
 Requires PHP: 7.4
-Tested up to: 6.9
-Stable tag: 2.1.1
+Tested up to: 7.0
+Stable tag: 2.1.2
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -102,6 +102,9 @@ This plugin is the most comprehensive solution available. While other plugins on
 4. FSE theme activation warning
 
 == Changelog ==
+
+= 2.1.2 =
+Tested up to WordPress 7.0
 
 = 2.1.1 =
 * Fixed headers already sent error on plugin activation
