@@ -1,0 +1,83 @@
+No Gutenberg - Disable Blocks Editor and Global Styles - Back to Classic Editor — Full changelog
+
+For each release, see the entries below. The latest version is always at the top.
+The current release notes also live in readme.txt under "== Changelog ==".
+
+= 2.2.0 =
+* New: Optional settings page under Settings > No Gutenberg, built around a single master switch. Leave "Disable Gutenberg completely" checked and the plugin works exactly as it always did, with no setup. Uncheck it and you choose what to disable. Every checkbox means the same thing, so no setting ever undoes another one
+* New: Rules to disable the block editor by post type, by user role, by page template and by individual entry IDs. Rules are independent: anything that matches gets the Classic Editor
+* New: Optional editor switching, enabled per post type next to its rule. Adds "Edit (Classic)" and "Edit (Blocks)" links to the entries of that post type and a switch inside both editors, and remembers the choice for each entry. The choice wins over every rule, in both directions, so one page can stay classic while its post type keeps blocks, or the other way around
+* New: Status panel that reports what is really happening on your site: block patterns blocked, weight saved on every page, Global Styles, widgets, Site Editor, active theme, and how much of your published content is actually built with blocks
+* New: Site wide pieces can be turned off one by one once the master switch is off: classic widgets, block patterns, frontend block assets, theme.json and Global Styles, Site Editor blocking and block theme notices
+* New: Configuration can be fixed from wp-config.php with NO_GUTENBERG_OPTIONS, and the settings screen locked as read only with NO_GUTENBERG_LOCK_SETTINGS or hidden with NO_GUTENBERG_HIDE_SETTINGS, for agencies and managed sites
+* New: Cleanup on uninstall. Plugin settings, dismissed notice user meta, and notice transients are removed when the plugin is deleted
+* Improved: WooCommerce is no longer an all or nothing switch. Its product editor now follows the same rules as any other post type, so leaving blocks on for products really leaves them on, and its block styles are removed along with the rest of the frontend block assets
+* Improved: The block theme warning is now shown only on the Dashboard and Appearance screens, and its dismiss script is properly enqueued instead of printed inline
+* Improved: Site Editor menu removal now covers the Patterns menu slug introduced in WordPress 6.8 and the Fonts screen introduced in WordPress 7.0
+* Improved: Minimum required WordPress version raised to 6.1, which is what the plugin features actually need
+* Fix: Block patterns are now really removed. The previous cleanup hooked itself on an init priority that had already run, so core and theme patterns kept being registered, and it relied on remove_all_actions(), which would have wiped other plugins' callbacks had it ever run
+* Fix: The Global Styles inline CSS and the per-block inline styles are now really removed from the frontend. Dequeuing the style handles was not enough, because Global Styles are printed inline
+* Fix: The WooCommerce block styles are now really removed too. They are enqueued while the blocks render, long after the point where the plugin used to look for them, so they were always printed in the footer regardless of the setting
+* Fix: Theme support removals now run after the active theme registers them, so disabling the FSE features takes effect on every theme
+* Fix: Removed dead legacy code (Gutenberg feature plugin hooks, pre-5.0 branch, duplicated filters, a no-op editor setting) and unified duplicated WooCommerce asset removals
+
+= 2.1.2 =
+Tested up to WordPress 7.0
+
+= 2.1.1 =
+* Fixed headers already sent error on plugin activation
+
+= 2.1.0 =
+* Added removal of Patterns submenu from Appearance menu (introduced in WP 6.5+ for all themes)
+* Added removal of Site Editor submenu
+* Added blocking of direct access to Site Editor pages
+* Better compatibility with WordPress 6.5+ changes
+
+= 2.0.1 =
+* Tested up to WordPress 6.9
+
+= 2.0 =
+* Complete plugin rewrite with object-oriented approach
+* Added removal of FSE Global Styles and theme.json support
+* Disabled block-based widgets completely
+* Removed block patterns and block directory
+* Added WooCommerce blocks removal
+* Eliminated all block-related CSS and JavaScript assets
+* Added activation notice and support links
+* Improved performance by removing more block overhead
+* Better code organization and security
+* Updated minimum PHP requirement to 7.4
+* Network/Multisite compatible
+
+= 1.1.0 =
+* Fix Fatal Error with prior version
+
+= 1.0.9 =
+* Tested up to WordPress 6.7.1
+
+= 1.0.8 =
+* Tested up to WordPress 6.6.2
+
+= 1.0.7 =
+* Tested up to WordPress 6.4
+
+= 1.0.6 =
+* Tested up to WordPress 6.2
+
+= 1.0.5 =
+* Tested up to WordPress 6.1
+
+= 1.0.4 =
+* Tested up to WordPress 6.0.2
+
+= 1.0.3 =
+* Tested up to WordPress 6.0
+
+= 1.0.2 =
+* Added the action to remove the FSE Global Styles
+
+= 1.0.1 =
+* Better and simply readme file
+
+= 1.0.0 =
+* Initial release with basic Gutenberg removal

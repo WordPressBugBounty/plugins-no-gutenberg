@@ -1,0 +1,233 @@
+/**
+ * No Gutenberg admin styles.
+ *
+ * Loaded only on Settings > No Gutenberg.
+ */
+
+/* Two column layout: settings on the left, services on the right */
+.nogb-layout {
+	display: flex;
+	gap: 24px;
+	align-items: flex-start;
+	margin-top: 10px;
+}
+
+.nogb-main {
+	flex: 1 1 auto;
+	min-width: 0;
+	max-width: 820px;
+}
+
+.nogb-sidebar {
+	flex: 0 0 300px;
+	width: 300px;
+}
+
+/* Status panel */
+.nogb-status {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-left: 4px solid #2271b1;
+	padding: 4px 20px 16px;
+	margin: 20px 0;
+	max-width: 1144px;
+}
+
+.nogb-status h2 {
+	font-size: 14px;
+	margin: 14px 0 10px;
+}
+
+.nogb-status-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.nogb-status-table th,
+.nogb-status-table td {
+	text-align: left;
+	padding: 6px 0;
+	font-size: 13px;
+	font-weight: 400;
+	vertical-align: top;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.nogb-status-table tr:last-child th,
+.nogb-status-table tr:last-child td {
+	border-bottom: 0;
+}
+
+.nogb-status-table th {
+	width: 40%;
+	color: #50575e;
+}
+
+.nogb-status-table td {
+	font-weight: 600;
+}
+
+.nogb-tone-on {
+	color: #007017;
+}
+
+.nogb-tone-off {
+	color: #996800;
+}
+
+.nogb-tone-info {
+	color: #1d2327;
+}
+
+/* Master switch */
+.nogb-settings .nogb-master {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	padding: 16px 20px;
+	margin-bottom: 20px;
+}
+
+.nogb-settings .nogb-master label {
+	font-size: 14px;
+}
+
+.nogb-settings .nogb-master .description {
+	margin: 8px 0 0 24px;
+}
+
+/* Post type matrix: one row per post type, one column per decision */
+.nogb-matrix {
+	border-collapse: collapse;
+	margin-bottom: 8px;
+}
+
+.nogb-matrix th,
+.nogb-matrix td {
+	padding: 6px 16px 6px 0;
+	text-align: left;
+	vertical-align: middle;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.nogb-matrix thead th {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	color: #50575e;
+	letter-spacing: 0.04em;
+}
+
+.nogb-matrix tbody th {
+	font-weight: 400;
+}
+
+.nogb-matrix tbody tr:last-child th,
+.nogb-matrix tbody tr:last-child td {
+	border-bottom: 0;
+}
+
+.nogb-matrix td {
+	text-align: center;
+	width: 120px;
+}
+
+.nogb-matrix code {
+	color: #50575e;
+	font-size: 11px;
+}
+
+/* Scope and site wide sections */
+.nogb-settings .nogb-inline-notice {
+	padding: 8px 12px;
+	background: #fcf9e8;
+	border-left: 4px solid #dba617;
+}
+
+.nogb-settings .nogb-lock-notice {
+	max-width: 1144px;
+}
+
+.nogb-settings .nogb-checklist label {
+	display: block;
+	margin-bottom: 6px;
+}
+
+.nogb-settings .nogb-checklist code {
+	color: #50575e;
+	font-size: 11px;
+}
+
+.nogb-settings .nogb-item {
+	margin: 0 0 14px;
+}
+
+.nogb-settings .nogb-item label {
+	display: block;
+	font-weight: 600;
+}
+
+.nogb-settings .nogb-item .description {
+	display: block;
+	margin-left: 24px;
+}
+
+/* Promotional boxes in the sidebar */
+.nogb-promo-box {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	padding: 16px;
+	margin-bottom: 16px;
+}
+
+.nogb-promo-box .nogb-promo-icon {
+	display: block;
+	font-size: 24px;
+	width: 24px;
+	height: 24px;
+	color: #2271b1;
+	margin-bottom: 10px;
+}
+
+.nogb-promo-box-title {
+	margin: 0 0 8px;
+	font-size: 13px;
+	font-weight: 600;
+	color: #1d2327;
+	line-height: 1.4;
+}
+
+.nogb-promo-box-description {
+	margin: 0 0 14px;
+	color: #50575e;
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+/* Specificity (0,3,0) to override WP core .button defaults */
+.nogb-settings .nogb-promo-box .button {
+	display: block;
+	text-align: center;
+	white-space: normal;
+	height: auto;
+	min-height: auto;
+	line-height: 1.4;
+	padding: 6px 12px;
+}
+
+@media screen and (max-width: 1100px) {
+	.nogb-layout {
+		display: block;
+	}
+
+	.nogb-sidebar {
+		width: auto;
+		max-width: 820px;
+		margin-top: 24px;
+	}
+}
+
+@media screen and (max-width: 782px) {
+	.nogb-status-table th {
+		width: 50%;
+	}
+}
