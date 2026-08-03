@@ -74,6 +74,8 @@ class AyudaWP_No_Gutenberg_Notices {
 		);
 		echo '</p>';
 
+		self::block_content_paragraph();
+
 		if ( self::is_fse_theme() ) {
 			echo '<p><strong style="color: #d63638;">' . esc_html__( 'Warning:', 'no-gutenberg' ) . '</strong> ';
 			printf(
@@ -87,6 +89,47 @@ class AyudaWP_No_Gutenberg_Notices {
 		echo '</div>';
 
 		delete_transient( 'ayudawp_no_gutenberg_activated' );
+	}
+
+	/**
+	 * Tell the site what is going to happen to the block content it already has
+	 *
+	 * Landing on a site with block content is the case this plugin gets wrong
+	 * most easily, so the activation notice says the number out loud instead of
+	 * only announcing that everything is disabled.
+	 */
+	private static function block_content_paragraph() {
+		if ( ! class_exists( 'AyudaWP_No_Gutenberg_Status' ) ) {
+			return;
+		}
+
+		$stats = AyudaWP_No_Gutenberg_Status::block_content_stats();
+
+		if ( $stats['with_blocks'] < 1 ) {
+			return;
+		}
+
+		echo '<p>';
+
+		if ( AyudaWP_No_Gutenberg_Options::guard_enabled() ) {
+			printf(
+				/* translators: 1: number of entries built with blocks, 2: opening link tag to the filtered entries list, 3: closing link tag. */
+				esc_html__( 'This site has %1$d entries built with blocks. They keep the block editor so nothing breaks their markup, and everything else opens in the Classic Editor. %2$sSee them%3$s.', 'no-gutenberg' ),
+				(int) $stats['with_blocks'],
+				'<a href="' . esc_url( AyudaWP_No_Gutenberg_Editor_Switch::list_url() ) . '">',
+				'</a>'
+			);
+		} else {
+			printf(
+				/* translators: 1: number of entries built with blocks, 2: opening link tag to the filtered entries list, 3: closing link tag. */
+				esc_html__( 'Careful: this site has %1$d entries built with blocks and they are opening in the Classic Editor, which can break their markup the first time they are saved. %2$sSee them%3$s.', 'no-gutenberg' ),
+				(int) $stats['with_blocks'],
+				'<a href="' . esc_url( AyudaWP_No_Gutenberg_Editor_Switch::list_url() ) . '">',
+				'</a>'
+			);
+		}
+
+		echo '</p>';
 	}
 
 	/**

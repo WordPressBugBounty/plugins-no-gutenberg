@@ -20,7 +20,7 @@ class AyudaWP_No_Gutenberg {
 	/**
 	 * Plugin version
 	 */
-	const VERSION = '2.2.0';
+	const VERSION = '2.3.0';
 
 	/**
 	 * Initialize the plugin
@@ -119,12 +119,19 @@ class AyudaWP_No_Gutenberg {
 		// An explicit per entry choice wins over every rule.
 		$preferred = AyudaWP_No_Gutenberg_Options::preferred_editor( $post );
 
-		if ( 'block' === $preferred ) {
-			return true;
-		}
-
 		if ( 'classic' === $preferred ) {
 			return false;
+		}
+
+		// Core runs this filter even when the post type filter above already
+		// answered false, so this is where an entry gets the block editor back:
+		// either because somebody chose it, or because it is built with blocks
+		// and the content protection is on.
+		$keep_blocks = 'block' === $preferred
+			|| AyudaWP_No_Gutenberg_Options::block_content_protected( $post );
+
+		if ( $keep_blocks && AyudaWP_No_Gutenberg_Options::post_type_can_use_block_editor( get_post_type( $post ) ) ) {
+			return true;
 		}
 
 		if ( AyudaWP_No_Gutenberg_Options::editor_disabled_for_post( $post ) ) {

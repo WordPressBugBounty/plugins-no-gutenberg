@@ -217,6 +217,16 @@ class AyudaWP_No_Gutenberg_Settings {
 						<?php echo esc_html__( 'Everything, everywhere: the block editor for every post type and user, block widgets, patterns, frontend block assets, theme.json and the Site Editor. This is how the plugin has always worked and needs no further setup. Uncheck it to choose exactly what to disable.', 'no-gutenberg' ); ?>
 					</p>
 
+					<p class="nogb-guard">
+						<label for="nogb-force_classic_on_blocks">
+							<input type="checkbox" id="nogb-force_classic_on_blocks" name="<?php echo esc_attr( AyudaWP_No_Gutenberg_Options::OPTION_NAME ); ?>[force_classic_on_blocks]" value="1" <?php checked( ! empty( $options['force_classic_on_blocks'] ) ); ?> <?php disabled( $locked ); ?> />
+							<?php echo esc_html__( 'Also on entries that are already built with blocks', 'no-gutenberg' ); ?>
+						</label>
+						<span class="description">
+							<?php echo esc_html__( 'Unchecked, an entry that contains blocks keeps the block editor whatever the rules above say, so nothing you set here can break existing content. Check it and the rules apply to everything, block content included: the Classic Editor reflows block markup, so those entries can lose their blocks the first time somebody saves them.', 'no-gutenberg' ); ?>
+						</span>
+					</p>
+
 				</div>
 
 				<div id="nogb-scope" class="nogb-scope">
@@ -300,7 +310,16 @@ class AyudaWP_No_Gutenberg_Settings {
 					<?php foreach ( $rows as $row ) : ?>
 					<tr>
 						<th scope="row"><?php echo esc_html( $row['label'] ); ?></th>
-						<td class="<?php echo esc_attr( 'nogb-tone-' . $row['tone'] ); ?>"><?php echo esc_html( $row['value'] ); ?></td>
+						<td class="<?php echo esc_attr( 'nogb-tone-' . $row['tone'] ); ?>">
+							<?php echo esc_html( $row['value'] ); ?>
+							<?php if ( ! empty( $row['links'] ) ) : ?>
+								<span class="nogb-status-links">
+									<?php foreach ( $row['links'] as $link ) : ?>
+										<a href="<?php echo esc_url( $link['url'] ); ?>"><?php echo esc_html( $link['label'] ); ?></a>
+									<?php endforeach; ?>
+								</span>
+							<?php endif; ?>
+						</td>
 					</tr>
 					<?php endforeach; ?>
 				</tbody>

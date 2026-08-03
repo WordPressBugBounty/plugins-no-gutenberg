@@ -1,7 +1,17 @@
-No Gutenberg - Disable Blocks Editor and Global Styles - Back to Classic Editor — Full changelog
+No Gutenberg - Choose Where to Use the Block Editor or the Classic Editor — Full changelog
 
 For each release, see the entries below. The latest version is always at the top.
 The current release notes also live in readme.txt under "== Changelog ==".
+
+= 2.3.0 =
+* New: Existing block content is protected. An entry that already contains blocks keeps the block editor whatever the rules say, so installing the plugin on a site with mixed content no longer sends that content to an editor that reflows its markup. A checkbox under the master switch gives the protection up when you really want the Classic Editor on everything
+* New: The entries list says which editor each entry opens with, and flags the entries built with blocks that are opening in the Classic Editor. A "Built with blocks" link next to All and Published narrows the list down to them, so you can finally see which entries they are instead of only how many
+* New: The Classic Editor warns you when the entry you are editing is built with blocks, before you save it, with a link to open it in the block editor instead
+* Improved: The editor chosen for a single entry is now honored whatever the configuration is, master switch included. It used to be read only where per entry switching was enabled, which left no way out on a site with everything disabled
+* Improved: Sites arriving from the Classic Editor plugin keep the editor it recorded for each entry, instead of starting from zero
+* Improved: The status panel counts drafts, pending, private and scheduled entries too, not only published ones, and links to the entries it is counting. A site in the middle of a migration was being told it had no block content
+* Improved: The activation notice says how many entries are built with blocks and what is going to happen to them
+* Fix: Uninstall now also removes the version option, the per entry editor meta and the content count transients
 
 = 2.2.0 =
 * New: Optional settings page under Settings > No Gutenberg, built around a single master switch. Leave "Disable Gutenberg completely" checked and the plugin works exactly as it always did, with no setup. Uncheck it and you choose what to disable. Every checkbox means the same thing, so no setting ever undoes another one

@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: No Gutenberg - Disable Blocks Editor and Global Styles - Back to Classic Editor
+ * Plugin Name: No Gutenberg - Choose Where to Use the Block Editor or the Classic Editor
  * Plugin URI: https://servicios.ayudawp.com/
  * Description: Complete elimination of Gutenberg Block Editor, FSE Global Styles, Block Widgets, Patterns, and WooCommerce blocks. Get back to the reliable Classic Editor with zero block-related overhead.
- * Version: 2.2.0
+ * Version: 2.3.0
  * Author: Fernando Tellado
  * Author URI: https://ayudawp.com/
  *
@@ -56,6 +56,10 @@ AyudaWP_No_Gutenberg_Editor_Switch::init();
 
 if ( is_admin() ) {
 	AyudaWP_No_Gutenberg_Settings::init();
+
+	// Carry an older configuration over after an automatic update, which never
+	// fires the activation hook below.
+	add_action( 'admin_init', array( 'AyudaWP_No_Gutenberg_Options', 'maybe_upgrade' ), 1 );
 }
 
 /**
@@ -68,6 +72,14 @@ register_activation_hook( __FILE__, 'ayudawp_no_gutenberg_activation' );
  */
 function ayudawp_no_gutenberg_activation() {
 	set_transient( 'ayudawp_no_gutenberg_activated', true, 60 );
+
+	AyudaWP_No_Gutenberg_Options::install();
+
+	// WP-CLI activates with is_admin() false, so the status class may not be
+	// loaded here.
+	if ( class_exists( 'AyudaWP_No_Gutenberg_Status' ) ) {
+		AyudaWP_No_Gutenberg_Status::flush_content_cache();
+	}
 }
 
 /**

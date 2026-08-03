@@ -95,6 +95,23 @@
 	margin: 8px 0 0 24px;
 }
 
+/* Content protection: applies whatever the master switch is set to */
+.nogb-settings .nogb-guard {
+	margin: 16px 0 0;
+	padding-top: 14px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.nogb-settings .nogb-guard label {
+	font-weight: 600;
+}
+
+.nogb-settings .nogb-guard .description {
+	display: block;
+	margin: 6px 0 0 24px;
+	max-width: 70ch;
+}
+
 /* Post type matrix: one row per post type, one column per decision */
 .nogb-matrix {
 	border-collapse: collapse;
@@ -230,4 +247,14 @@
 	.nogb-status-table th {
 		width: 50%;
 	}
+}
+
+/* Links breaking the block content count down by post type */
+.nogb-status-links a {
+	margin-left: 10px;
+	white-space: nowrap;
+}
+
+.nogb-status-links a:first-child {
+	margin-left: 6px;
 }

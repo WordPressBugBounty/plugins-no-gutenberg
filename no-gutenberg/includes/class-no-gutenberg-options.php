@@ -24,6 +24,11 @@ class AyudaWP_No_Gutenberg_Options {
 	const OPTION_NAME = 'ayudawp_no_gutenberg_options';
 
 	/**
+	 * Option storing the version that last ran, used to migrate defaults.
+	 */
+	const VERSION_OPTION = 'ayudawp_no_gutenberg_version';
+
+	/**
 	 * Settings group used by the Settings API.
 	 */
 	const OPTION_GROUP = 'ayudawp_no_gutenberg';
@@ -50,6 +55,12 @@ class AyudaWP_No_Gutenberg_Options {
 			// Master switch. On its own it disables everything, everywhere.
 			'complete'           => true,
 
+			// Entries that already contain blocks keep the block editor, so no
+			// rule can quietly send existing block content to a editor that
+			// would break its markup on the first save. Checking this box gives
+			// up that protection and applies the rules to everything.
+			'force_classic_on_blocks' => false,
+
 			// Where to disable the block editor when the master switch is off.
 			// An empty list means "no rule of this kind", not "everywhere".
 			'disable_post_types' => array(),
@@ -74,6 +85,103 @@ class AyudaWP_No_Gutenberg_Options {
 	 * Post meta storing the editor chosen for a single entry.
 	 */
 	const EDITOR_META = '_ayudawp_no_gutenberg_editor';
+
+	/**
+	 * Post meta the Classic Editor plugin uses for the same purpose.
+	 *
+	 * Coming from Classic Editor is the most common way to land on this plugin,
+	 * and that plugin has been recording the editor of every entry it opened.
+	 * Reading it, never writing it, means a site that switches over keeps the
+	 * choices it had instead of starting from zero.
+	 */
+	const CLASSIC_EDITOR_META = 'classic-editor-remember';
+
+	/**
+	 * Whether existing block content is protected from the editor rules.
+	 *
+	 * @return bool
+	 */
+	public static function guard_enabled() {
+		$options = self::get();
+
+		return empty( $options['force_classic_on_blocks'] );
+	}
+
+	/**
+	 * Whether an entry is built with blocks.
+	 *
+	 * @param WP_Post|int $post Post object or ID.
+	 * @return bool
+	 */
+	public static function post_has_blocks( $post ) {
+		$post = get_post( $post );
+
+		return $post instanceof WP_Post && has_blocks( $post );
+	}
+
+	/**
+	 * Whether a post type can run the block editor at all.
+	 *
+	 * These are the checks core makes before its own filter, and they have to
+	 * be repeated here because the plugin can answer true to the per post
+	 * filter after core already answered false: forcing the block editor on a
+	 * post type that is not in the REST API would only produce a broken screen.
+	 *
+	 * @param string $post_type Post type slug.
+	 * @return bool
+	 */
+	public static function post_type_can_use_block_editor( $post_type ) {
+		if ( ! $post_type || ! post_type_exists( $post_type ) ) {
+			return false;
+		}
+
+		if ( ! post_type_supports( $post_type, 'editor' ) ) {
+			return false;
+		}
+
+		$object = get_post_type_object( $post_type );
+
+		return ! $object || ! empty( $object->show_in_rest );
+	}
+
+	/**
+	 * Whether a post type is one of the internal ones the block editor uses.
+	 *
+	 * Reusable blocks, templates, navigation menus and global styles are stored
+	 * as entries and are full of block markup by definition, so they have no
+	 * place in a report about the content of the site.
+	 *
+	 * @param string $post_type Post type slug.
+	 * @return bool
+	 */
+	public static function is_internal_post_type( $post_type ) {
+		return 0 === strpos( (string) $post_type, 'wp_' );
+	}
+
+	/**
+	 * Whether an entry keeps the block editor because of its own content.
+	 *
+	 * This is the protection that makes the plugin non destructive on a site
+	 * that already has block content: the rules decide where the block editor
+	 * goes away, but they never send an entry built with blocks to an editor
+	 * that would mangle its markup the first time somebody saves it.
+	 *
+	 * @param WP_Post|int $post Post object or ID.
+	 * @return bool
+	 */
+	public static function block_content_protected( $post ) {
+		if ( ! self::guard_enabled() ) {
+			return false;
+		}
+
+		$post = get_post( $post );
+
+		if ( ! $post instanceof WP_Post ) {
+			return false;
+		}
+
+		return self::post_has_blocks( $post ) && self::post_type_can_use_block_editor( $post->post_type );
+	}
 
 	/**
 	 * Whether editors can be switched entry by entry.
@@ -105,7 +213,10 @@ class AyudaWP_No_Gutenberg_Options {
 	 *
 	 * A stored choice wins over every rule, in both directions: it is what
 	 * makes "this one page in the Classic Editor" possible while the rest of
-	 * its post type keeps the block editor, and the other way around.
+	 * its post type keeps the block editor, and the other way around. It is
+	 * read whatever the configuration is, master switch included, because it
+	 * is the only setting a person made about that one entry, and it is also
+	 * how an entry leaves the content protection once it has been migrated.
 	 *
 	 * @param WP_Post|int $post Post object or ID.
 	 * @return string 'block', 'classic' or an empty string.
@@ -113,13 +224,37 @@ class AyudaWP_No_Gutenberg_Options {
 	public static function preferred_editor( $post ) {
 		$post = get_post( $post );
 
-		if ( ! $post || ! self::switching_allowed( $post->post_type ) ) {
+		if ( ! $post ) {
 			return '';
 		}
 
 		$preferred = get_post_meta( $post->ID, self::EDITOR_META, true );
 
-		return in_array( $preferred, array( 'block', 'classic' ), true ) ? $preferred : '';
+		if ( in_array( $preferred, array( 'block', 'classic' ), true ) ) {
+			return $preferred;
+		}
+
+		return self::inherited_editor( $post );
+	}
+
+	/**
+	 * Editor the Classic Editor plugin recorded for an entry, if any.
+	 *
+	 * @param WP_Post $post Post object.
+	 * @return string 'block', 'classic' or an empty string.
+	 */
+	private static function inherited_editor( $post ) {
+		$inherited = get_post_meta( $post->ID, self::CLASSIC_EDITOR_META, true );
+
+		if ( 'block-editor' === $inherited ) {
+			return 'block';
+		}
+
+		if ( 'classic-editor' === $inherited ) {
+			return 'classic';
+		}
+
+		return '';
 	}
 
 	/**
@@ -374,6 +509,53 @@ class AyudaWP_No_Gutenberg_Options {
 	}
 
 	/**
+	 * Record the version on a brand new install, or migrate an older one.
+	 */
+	public static function install() {
+		$fresh = false === get_option( self::VERSION_OPTION, false )
+			&& false === get_option( self::OPTION_NAME, false );
+
+		if ( $fresh ) {
+			update_option( self::VERSION_OPTION, AyudaWP_No_Gutenberg::VERSION );
+			return;
+		}
+
+		self::maybe_upgrade();
+	}
+
+	/**
+	 * Carry an older configuration over to the current one.
+	 *
+	 * Before 2.3.0 the plugin had no content protection and sent every entry to
+	 * the Classic Editor, block content included. A site running that way is
+	 * already living with it, so the new default is only for sites installing
+	 * the plugin from now on: an update never changes which editor opens.
+	 */
+	public static function maybe_upgrade() {
+		$stored = get_option( self::VERSION_OPTION, '' );
+
+		if ( AyudaWP_No_Gutenberg::VERSION === $stored ) {
+			return;
+		}
+
+		if ( '' === $stored || false === $stored ) {
+			$options = get_option( self::OPTION_NAME, array() );
+
+			if ( ! is_array( $options ) ) {
+				$options = array();
+			}
+
+			if ( ! array_key_exists( 'force_classic_on_blocks', $options ) ) {
+				$options['force_classic_on_blocks'] = true;
+				update_option( self::OPTION_NAME, $options );
+			}
+		}
+
+		update_option( self::VERSION_OPTION, AyudaWP_No_Gutenberg::VERSION );
+		self::flush_cache();
+	}
+
+	/**
 	 * Sanitize the settings form.
 	 *
 	 * @param mixed $input     Raw settings input.
@@ -391,6 +573,13 @@ class AyudaWP_No_Gutenberg_Options {
 
 		if ( $with_defaults || array_key_exists( 'complete', $input ) ) {
 			$clean['complete'] = ! empty( $input['complete'] );
+		}
+
+		// Deliberately outside the site wide items below: a complete disable
+		// must not switch the content protection off on its own. Giving up the
+		// protection is always an explicit decision.
+		if ( $with_defaults || array_key_exists( 'force_classic_on_blocks', $input ) ) {
+			$clean['force_classic_on_blocks'] = ! empty( $input['force_classic_on_blocks'] );
 		}
 
 		foreach ( self::site_items() as $item ) {

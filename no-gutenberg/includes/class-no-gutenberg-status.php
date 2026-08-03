@@ -24,6 +24,11 @@ class AyudaWP_No_Gutenberg_Status {
 	const CONTENT_TRANSIENT = 'ayudawp_no_gutenberg_block_content';
 
 	/**
+	 * Transient caching the block content count of each post type.
+	 */
+	const COUNT_TRANSIENT = 'ayudawp_no_gutenberg_block_counts';
+
+	/**
 	 * How long the block content count is cached.
 	 */
 	const CONTENT_TTL = 12 * HOUR_IN_SECONDS;
@@ -170,12 +175,25 @@ class AyudaWP_No_Gutenberg_Status {
 			$rows[] = array(
 				'label' => __( 'Your content', 'no-gutenberg' ),
 				'value' => sprintf(
-					/* translators: 1: number of entries built with blocks, 2: total number of published entries. */
-					__( '%1$d of %2$d published entries are built with blocks', 'no-gutenberg' ),
+					/* translators: 1: number of entries built with blocks, 2: total number of entries. */
+					__( '%1$d of %2$d entries are built with blocks', 'no-gutenberg' ),
 					$content['with_blocks'],
 					$content['total']
 				),
 				'tone'  => 'info',
+				'links' => self::block_content_links(),
+			);
+		}
+
+		if ( $content['with_blocks'] > 0 && AyudaWP_No_Gutenberg_Options::editor_has_rules() ) {
+			$protected = AyudaWP_No_Gutenberg_Options::guard_enabled();
+
+			$rows[] = array(
+				'label' => __( 'Existing block content', 'no-gutenberg' ),
+				'value' => $protected
+					? __( 'Keeps the block editor, so the rules cannot break its markup', 'no-gutenberg' )
+					: __( 'Opens in the Classic Editor, which can break its markup on save', 'no-gutenberg' ),
+				'tone'  => $protected ? 'info' : 'on',
 			);
 		}
 
@@ -274,13 +292,19 @@ class AyudaWP_No_Gutenberg_Status {
 		// There is no WordPress API to count how many entries contain blocks,
 		// so this needs a direct query. It is cached in a transient for 12
 		// hours and only runs on the plugin settings screen.
+		//
+		// Every status that shows up in the entries lists counts, not only the
+		// published ones: a site in the middle of a migration keeps its block
+		// content in drafts, and reporting a zero there would be a lie right
+		// where the answer matters most. The excluded statuses are the ones
+		// with no content of their own: revisions and attachments inherit,
+		// auto drafts are empty and the trash is on its way out.
 		$row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- No core API for this count; result cached in a transient right below.
 			$wpdb->prepare(
 				"SELECT COUNT(*) AS total, SUM( CASE WHEN post_content LIKE %s THEN 1 ELSE 0 END ) AS with_blocks
 				FROM {$wpdb->posts}
-				WHERE post_status = %s AND post_type NOT LIKE %s",
+				WHERE post_type NOT LIKE %s AND post_status NOT IN ( 'auto-draft', 'trash', 'inherit' )",
 				$needle,
-				'publish',
 				$internal
 			),
 			ARRAY_A
@@ -308,9 +332,87 @@ class AyudaWP_No_Gutenberg_Status {
 	}
 
 	/**
+	 * One link per post type that has content built with blocks.
+	 *
+	 * The count spans the whole site, so a single link would send you to one
+	 * post type and hide the rest. Breaking it down is also the answer to the
+	 * only question that number raises: which entries are they.
+	 *
+	 * @return array List of label and url pairs.
+	 */
+	public static function block_content_links() {
+		$links = array();
+
+		foreach ( get_post_types( array( 'show_ui' => true ), 'objects' ) as $object ) {
+			if ( AyudaWP_No_Gutenberg_Options::is_internal_post_type( $object->name ) ) {
+				continue;
+			}
+
+			if ( ! AyudaWP_No_Gutenberg_Options::post_type_can_use_block_editor( $object->name ) ) {
+				continue;
+			}
+
+			$count = self::block_content_count( $object->name );
+
+			if ( $count < 1 ) {
+				continue;
+			}
+
+			$links[] = array(
+				'label' => sprintf(
+					/* translators: 1: post type name, 2: number of its entries built with blocks. */
+					__( '%1$s (%2$s)', 'no-gutenberg' ),
+					$object->labels->name,
+					number_format_i18n( $count )
+				),
+				'url'   => AyudaWP_No_Gutenberg_Editor_Switch::list_url( $object->name ),
+			);
+		}
+
+		return $links;
+	}
+
+	/**
+	 * How many entries of a post type are built with blocks.
+	 *
+	 * @param string $post_type Post type slug.
+	 * @return int
+	 */
+	public static function block_content_count( $post_type ) {
+		$counts = get_transient( self::COUNT_TRANSIENT );
+
+		if ( ! is_array( $counts ) ) {
+			$counts = array();
+		}
+
+		if ( isset( $counts[ $post_type ] ) ) {
+			return (int) $counts[ $post_type ];
+		}
+
+		global $wpdb;
+
+		$count = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- No core API for this count; result cached in a transient right below.
+			$wpdb->prepare(
+				"SELECT COUNT(*)
+				FROM {$wpdb->posts}
+				WHERE post_type = %s AND post_status NOT IN ( 'auto-draft', 'trash', 'inherit' ) AND post_content LIKE %s",
+				$post_type,
+				'%' . $wpdb->esc_like( '<!-- wp:' ) . '%'
+			)
+		);
+
+		$counts[ $post_type ] = $count;
+
+		set_transient( self::COUNT_TRANSIENT, $counts, self::CONTENT_TTL );
+
+		return $count;
+	}
+
+	/**
 	 * Discard the cached content count.
 	 */
 	public static function flush_content_cache() {
 		delete_transient( self::CONTENT_TRANSIENT );
+		delete_transient( self::COUNT_TRANSIENT );
 	}
 }
