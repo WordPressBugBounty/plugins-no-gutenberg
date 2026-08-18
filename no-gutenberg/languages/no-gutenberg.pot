@@ -2,21 +2,21 @@
 # This file is distributed under the GPL2+.
 msgid ""
 msgstr ""
-"Project-Id-Version: No Gutenberg - Disable Blocks Editor and Global Styles - Back to Classic Editor 2.2.0\n"
+"Project-Id-Version: No Gutenberg? - Choose Where to Use the Block Editor or the Classic Editor 2.3.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/no-gutenberg\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-02T16:19:32+00:00\n"
+"POT-Creation-Date: 2026-08-18T15:31:25+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: no-gutenberg\n"
 
 #. Plugin Name of the plugin
 #: no-gutenberg.php
-msgid "No Gutenberg - Disable Blocks Editor and Global Styles - Back to Classic Editor"
+msgid "No Gutenberg? - Choose Where to Use the Block Editor or the Classic Editor"
 msgstr ""
 
 #. Plugin URI of the plugin
@@ -39,24 +39,49 @@ msgstr ""
 msgid "https://ayudawp.com/"
 msgstr ""
 
-#: includes/class-no-gutenberg-editor-switch.php:151
+#: includes/class-no-gutenberg-editor-switch.php:210
 msgid "Edit (Classic)"
 msgstr ""
 
-#: includes/class-no-gutenberg-editor-switch.php:157
+#: includes/class-no-gutenberg-editor-switch.php:216
 msgid "Edit (Blocks)"
 msgstr ""
 
-#: includes/class-no-gutenberg-editor-switch.php:177
+#: includes/class-no-gutenberg-editor-switch.php:236
 msgid "Switch to the block editor"
 msgstr ""
 
-#: includes/class-no-gutenberg-editor-switch.php:206
+#: includes/class-no-gutenberg-editor-switch.php:265
 msgid "Switch to the Classic Editor"
 msgstr ""
 
+#: includes/class-no-gutenberg-editor-switch.php:312
+#: includes/class-no-gutenberg-status.php:49
+msgid "Block editor"
+msgstr ""
+
+#: includes/class-no-gutenberg-editor-switch.php:314
+msgid "Block content, Classic Editor"
+msgstr ""
+
+#: includes/class-no-gutenberg-editor-switch.php:409
+msgid "Built with blocks"
+msgstr ""
+
+#: includes/class-no-gutenberg-editor-switch.php:446
+msgid "This entry is built with blocks."
+msgstr ""
+
+#: includes/class-no-gutenberg-editor-switch.php:447
+msgid "The Classic Editor reflows its markup, so saving it here can break the blocks it contains. Its content is untouched until you save."
+msgstr ""
+
+#: includes/class-no-gutenberg-editor-switch.php:452
+msgid "Open it in the block editor instead"
+msgstr ""
+
 #: includes/class-no-gutenberg-notices.php:65
-msgid "No Gutenberg activated successfully!"
+msgid "No Gutenberg? activated successfully!"
 msgstr ""
 
 #: includes/class-no-gutenberg-notices.php:66
@@ -73,62 +98,74 @@ msgstr ""
 msgid "settings page"
 msgstr ""
 
-#: includes/class-no-gutenberg-notices.php:78
+#: includes/class-no-gutenberg-notices.php:80
 msgid "Warning:"
 msgstr ""
 
 #. translators: %s is the name of the current active theme
-#: includes/class-no-gutenberg-notices.php:81
+#: includes/class-no-gutenberg-notices.php:83
 #, php-format
 msgid "Your current theme \"%s\" is a Full Site Editing (FSE) theme and may not work properly with this plugin. Consider switching to a classic theme that uses the WordPress Customizer for the best experience."
 msgstr ""
 
-#: includes/class-no-gutenberg-notices.php:134
+#. translators: 1: number of entries built with blocks, 2: opening link tag to the filtered entries list, 3: closing link tag.
+#: includes/class-no-gutenberg-notices.php:117
+#, php-format
+msgid "This site has %1$d entries built with blocks. They keep the block editor so nothing breaks their markup, and everything else opens in the Classic Editor. %2$sSee them%3$s."
+msgstr ""
+
+#. translators: 1: number of entries built with blocks, 2: opening link tag to the filtered entries list, 3: closing link tag.
+#: includes/class-no-gutenberg-notices.php:125
+#, php-format
+msgid "Careful: this site has %1$d entries built with blocks and they are opening in the Classic Editor, which can break their markup the first time they are saved. %2$sSee them%3$s."
+msgstr ""
+
+#: includes/class-no-gutenberg-notices.php:177
 msgid "No Gutenberg - FSE Theme Warning"
 msgstr ""
 
 #. translators: %s is the name of the current active theme
-#: includes/class-no-gutenberg-notices.php:138
+#: includes/class-no-gutenberg-notices.php:181
 #, php-format
 msgid "You are currently using \"%s\", which is a Full Site Editing (FSE) theme. This plugin disables all FSE functionality, so your theme may not work as expected. The Site Editor will be broken and many theme features will be unavailable."
 msgstr ""
 
-#: includes/class-no-gutenberg-notices.php:142
+#: includes/class-no-gutenberg-notices.php:185
 msgid "Recommendation:"
 msgstr ""
 
-#: includes/class-no-gutenberg-notices.php:142
+#: includes/class-no-gutenberg-notices.php:185
 msgid "Switch to a classic theme that uses the WordPress Customizer for full compatibility."
 msgstr ""
 
-#: includes/class-no-gutenberg-notices.php:224
-msgid "No Gutenberg - FSE Theme Conflict!"
+#: includes/class-no-gutenberg-notices.php:267
+msgid "No Gutenberg? - FSE Theme Conflict!"
 msgstr ""
 
 #. translators: %s is the name of the FSE theme that was just activated
-#: includes/class-no-gutenberg-notices.php:228
+#: includes/class-no-gutenberg-notices.php:271
 #, php-format
-msgid "You just activated \"%s\", which is a Full Site Editing (FSE) theme. The No Gutenberg plugin is currently active and disables all FSE functionality."
+msgid "You just activated \"%s\", which is a Full Site Editing (FSE) theme. The No Gutenberg? plugin is currently active and disables all FSE functionality."
 msgstr ""
 
-#: includes/class-no-gutenberg-notices.php:232
+#: includes/class-no-gutenberg-notices.php:275
 msgid "Your options:"
 msgstr ""
 
-#: includes/class-no-gutenberg-notices.php:234
+#: includes/class-no-gutenberg-notices.php:277
 msgid "Deactivate the No Gutenberg plugin to use FSE features"
 msgstr ""
 
-#: includes/class-no-gutenberg-notices.php:235
-msgid "Switch to a classic theme for full compatibility with No Gutenberg"
+#: includes/class-no-gutenberg-notices.php:278
+msgid "Switch to a classic theme for full compatibility with No Gutenberg?"
 msgstr ""
 
-#: includes/class-no-gutenberg-notices.php:236
+#: includes/class-no-gutenberg-notices.php:279
 msgid "Turn off the Site Editor blocking module on the plugin settings page"
 msgstr ""
 
-#: includes/class-no-gutenberg-notices.php:238
-msgid "Note: The Site Editor and many theme features will not work properly while No Gutenberg is active."
+#: includes/class-no-gutenberg-notices.php:281
+msgid "Note: The Site Editor and many theme features will not work properly while No Gutenberg? is active."
 msgstr ""
 
 #: includes/class-no-gutenberg-promo-banner.php:58
@@ -200,7 +237,7 @@ msgstr ""
 #: includes/class-no-gutenberg-settings.php:64
 #: includes/class-no-gutenberg-settings.php:65
 #: includes/class-no-gutenberg-settings.php:195
-msgid "No Gutenberg"
+msgid "No Gutenberg?"
 msgstr ""
 
 #: includes/class-no-gutenberg-settings.php:157
@@ -260,87 +297,91 @@ msgid "Everything, everywhere: the block editor for every post type and user, bl
 msgstr ""
 
 #: includes/class-no-gutenberg-settings.php:223
+msgid "Also on entries that are already built with blocks"
+msgstr ""
+
+#: includes/class-no-gutenberg-settings.php:226
+msgid "Unchecked, an entry that contains blocks keeps the block editor whatever the rules above say, so nothing you set here can break existing content. Check it and the rules apply to everything, block content included: the Classic Editor reflows block markup, so those entries can lose their blocks the first time somebody saves them."
+msgstr ""
+
+#: includes/class-no-gutenberg-settings.php:233
 msgid "Disable the block editor for..."
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:225
+#: includes/class-no-gutenberg-settings.php:235
 msgid "Rules are independent: anything that matches gets the Classic Editor. Leave every rule empty and the block editor stays available."
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:230
+#: includes/class-no-gutenberg-settings.php:240
 msgid "WooCommerce products play by these same rules: check Products below to force the classic product editor. Its block styles are removed with the rest of the frontend block assets."
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:237
+#: includes/class-no-gutenberg-settings.php:247
 msgid "Post types"
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:241
+#: includes/class-no-gutenberg-settings.php:251
 msgid "User roles"
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:246
+#: includes/class-no-gutenberg-settings.php:256
 msgid "Page templates"
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:251
+#: includes/class-no-gutenberg-settings.php:261
 msgid "Individual entries"
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:257
+#: includes/class-no-gutenberg-settings.php:267
 msgid "Site wide"
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:259
+#: includes/class-no-gutenberg-settings.php:269
 msgid "These belong to the whole site, not to a post type, so they are not affected by the rules above."
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:263
+#: includes/class-no-gutenberg-settings.php:273
 msgid "Two options were unchecked for you: with the block editor still available somewhere, removing the block styles would leave that content unstyled on the frontend. Check them again if you know what you are doing."
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:297
+#: includes/class-no-gutenberg-settings.php:307
 msgid "What is happening on this site"
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:319
+#: includes/class-no-gutenberg-settings.php:338
 msgid "Settings locked from wp-config.php"
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:322
-msgid "This configuration is fixed in code, so it cannot be changed from here. Remove the No Gutenberg constants from wp-config.php to edit it again."
+#: includes/class-no-gutenberg-settings.php:341
+msgid "This configuration is fixed in code, so it cannot be changed from here. Remove the No Gutenberg? constants from wp-config.php to edit it again."
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:342
+#: includes/class-no-gutenberg-settings.php:361
 msgid "Post type"
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:343
+#: includes/class-no-gutenberg-settings.php:362
 msgid "Classic Editor"
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:344
+#: includes/class-no-gutenberg-settings.php:363
 msgid "Let each entry switch"
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:381
+#: includes/class-no-gutenberg-settings.php:400
 msgid "The second column adds \"Edit (Classic)\" and \"Edit (Blocks)\" links to the entries of that post type, plus a switch inside both editors. Each entry remembers the editor chosen for it, and that choice beats the rules in both directions."
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:408
+#: includes/class-no-gutenberg-settings.php:427
 msgid "Users with these roles always get the Classic Editor, whatever they are editing."
 msgstr ""
 
-#: includes/class-no-gutenberg-settings.php:457
+#: includes/class-no-gutenberg-settings.php:476
 msgid "Entry IDs separated by commas. Useful for that one landing page that has to stay on the Classic Editor."
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:44
-msgid "Block editor"
-msgstr ""
-
 #. translators: %d: number of block patterns registered on the site.
-#: includes/class-no-gutenberg-status.php:54
+#: includes/class-no-gutenberg-status.php:59
 #, php-format
 msgid "%d pattern registered"
 msgid_plural "%d patterns registered"
@@ -348,137 +389,149 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of block patterns other plugins keep registered.
-#: includes/class-no-gutenberg-status.php:63
+#: includes/class-no-gutenberg-status.php:68
 #, php-format
 msgid "Core and theme patterns removed, %d still added by other plugins"
 msgid_plural "Core and theme patterns removed, %d still added by other plugins"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-no-gutenberg-status.php:72
+#: includes/class-no-gutenberg-status.php:77
 msgid "Removed, none registered"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:76
+#: includes/class-no-gutenberg-status.php:81
 msgid "Block patterns"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:84
+#: includes/class-no-gutenberg-status.php:89
 msgid "Block assets on the frontend"
 msgstr ""
 
 #. translators: %s: approximate size of the block library stylesheet, already formatted.
-#: includes/class-no-gutenberg-status.php:88
+#: includes/class-no-gutenberg-status.php:93
 #, php-format
 msgid "Removed, around %s saved per page"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:91
+#: includes/class-no-gutenberg-status.php:96
 msgid "Loaded on every page"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:96
+#: includes/class-no-gutenberg-status.php:101
 msgid "theme.json and Global Styles"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:98
+#: includes/class-no-gutenberg-status.php:103
 msgid "Neutralized"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:99
+#: includes/class-no-gutenberg-status.php:104
 msgid "Processed as usual"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:104
+#: includes/class-no-gutenberg-status.php:109
 msgid "Widgets"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:106
+#: includes/class-no-gutenberg-status.php:111
 msgid "Classic widgets"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:107
+#: includes/class-no-gutenberg-status.php:112
 msgid "Block widgets"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:112
+#: includes/class-no-gutenberg-status.php:117
 msgid "Site Editor"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:114
+#: includes/class-no-gutenberg-status.php:119
 msgid "Menus removed and access blocked"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:115
+#: includes/class-no-gutenberg-status.php:120
 msgid "Available"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:120
+#: includes/class-no-gutenberg-status.php:125
 msgid "Active theme"
-msgstr ""
-
-#. translators: %s: name of the active theme.
-#: includes/class-no-gutenberg-status.php:124
-#, php-format
-msgid "%s, a block theme"
 msgstr ""
 
 #. translators: %s: name of the active theme.
 #: includes/class-no-gutenberg-status.php:129
 #, php-format
+msgid "%s, a block theme"
+msgstr ""
+
+#. translators: %s: name of the active theme.
+#: includes/class-no-gutenberg-status.php:134
+#, php-format
 msgid "%s, a classic theme"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:139
+#: includes/class-no-gutenberg-status.php:144
 msgid "WooCommerce products"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:141
+#: includes/class-no-gutenberg-status.php:146
 msgid "Classic product editor"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:142
+#: includes/class-no-gutenberg-status.php:147
 msgid "Block product editor"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:157
+#: includes/class-no-gutenberg-status.php:162
 msgid "Editor switching"
 msgstr ""
 
 #. translators: %s: comma separated list of post type names.
-#: includes/class-no-gutenberg-status.php:160
+#: includes/class-no-gutenberg-status.php:165
 #, php-format
 msgid "Allowed entry by entry in %s"
 msgstr ""
 
-#: includes/class-no-gutenberg-status.php:171
+#: includes/class-no-gutenberg-status.php:176
 msgid "Your content"
 msgstr ""
 
-#. translators: 1: number of entries built with blocks, 2: total number of published entries.
-#: includes/class-no-gutenberg-status.php:174
+#. translators: 1: number of entries built with blocks, 2: total number of entries.
+#: includes/class-no-gutenberg-status.php:179
 #, php-format
-msgid "%1$d of %2$d published entries are built with blocks"
+msgid "%1$d of %2$d entries are built with blocks"
 msgstr ""
 
 #: includes/class-no-gutenberg-status.php:192
+msgid "Existing block content"
+msgstr ""
+
+#: includes/class-no-gutenberg-status.php:194
+msgid "Keeps the block editor, so the rules cannot break its markup"
+msgstr ""
+
+#: includes/class-no-gutenberg-status.php:195
+msgid "Opens in the Classic Editor, which can break its markup on save"
+msgstr ""
+
+#: includes/class-no-gutenberg-status.php:210
 msgid "Disabled everywhere"
 msgstr ""
 
 #. translators: %s: comma separated list of post type names.
-#: includes/class-no-gutenberg-status.php:207
+#: includes/class-no-gutenberg-status.php:225
 #, php-format
 msgid "post types: %s"
 msgstr ""
 
 #. translators: %s: comma separated list of user role names.
-#: includes/class-no-gutenberg-status.php:219
+#: includes/class-no-gutenberg-status.php:237
 #, php-format
 msgid "roles: %s"
 msgstr ""
 
 #. translators: %d: number of page templates.
-#: includes/class-no-gutenberg-status.php:224
+#: includes/class-no-gutenberg-status.php:242
 #, php-format
 msgid "%d template"
 msgid_plural "%d templates"
@@ -486,27 +539,33 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of individual entries.
-#: includes/class-no-gutenberg-status.php:229
+#: includes/class-no-gutenberg-status.php:247
 #, php-format
 msgid "%d entry"
 msgid_plural "%d entries"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-no-gutenberg-status.php:233
+#: includes/class-no-gutenberg-status.php:251
 msgid "Not disabled anywhere"
 msgstr ""
 
 #. translators: %s: list of the rules that disable the block editor.
-#: includes/class-no-gutenberg-status.php:237
+#: includes/class-no-gutenberg-status.php:255
 #, php-format
 msgid "Disabled for %s"
 msgstr ""
 
-#: no-gutenberg.php:80
+#. translators: 1: post type name, 2: number of its entries built with blocks.
+#: includes/class-no-gutenberg-status.php:364
+#, php-format
+msgid "%1$s (%2$s)"
+msgstr ""
+
+#: no-gutenberg.php:92
 msgid "Settings"
 msgstr ""
 
-#: no-gutenberg.php:81
+#: no-gutenberg.php:93
 msgid "Support"
 msgstr ""

@@ -62,7 +62,7 @@ class AyudaWP_No_Gutenberg_Notices {
 		$current_theme = wp_get_theme();
 
 		echo '<div class="notice notice-success is-dismissible">';
-		echo '<p><strong>' . esc_html__( 'No Gutenberg activated successfully!', 'no-gutenberg' ) . '</strong> ';
+		echo '<p><strong>' . esc_html__( 'No Gutenberg? activated successfully!', 'no-gutenberg' ) . '</strong> ';
 		echo esc_html__( 'Gutenberg Block Editor, FSE features, and all block-related assets have been completely disabled. Welcome back to the Classic Editor!', 'no-gutenberg' );
 		echo '</p>';
 
@@ -264,21 +264,21 @@ class AyudaWP_No_Gutenberg_Notices {
 		}
 
 		echo '<div class="notice notice-error is-dismissible">';
-		echo '<p><strong>' . esc_html__( 'No Gutenberg - FSE Theme Conflict!', 'no-gutenberg' ) . '</strong></p>';
+		echo '<p><strong>' . esc_html__( 'No Gutenberg? - FSE Theme Conflict!', 'no-gutenberg' ) . '</strong></p>';
 		echo '<p>';
 		printf(
 			/* translators: %s is the name of the FSE theme that was just activated */
-			esc_html__( 'You just activated "%s", which is a Full Site Editing (FSE) theme. The No Gutenberg plugin is currently active and disables all FSE functionality.', 'no-gutenberg' ),
+			esc_html__( 'You just activated "%s", which is a Full Site Editing (FSE) theme. The No Gutenberg? plugin is currently active and disables all FSE functionality.', 'no-gutenberg' ),
 			esc_html( $theme_name )
 		);
 		echo '</p>';
 		echo '<p><strong>' . esc_html__( 'Your options:', 'no-gutenberg' ) . '</strong></p>';
 		echo '<ul style="list-style: disc; margin-left: 20px;">';
 		echo '<li>' . esc_html__( 'Deactivate the No Gutenberg plugin to use FSE features', 'no-gutenberg' ) . '</li>';
-		echo '<li>' . esc_html__( 'Switch to a classic theme for full compatibility with No Gutenberg', 'no-gutenberg' ) . '</li>';
+		echo '<li>' . esc_html__( 'Switch to a classic theme for full compatibility with No Gutenberg?', 'no-gutenberg' ) . '</li>';
 		echo '<li>' . esc_html__( 'Turn off the Site Editor blocking module on the plugin settings page', 'no-gutenberg' ) . '</li>';
 		echo '</ul>';
-		echo '<p><em>' . esc_html__( 'Note: The Site Editor and many theme features will not work properly while No Gutenberg is active.', 'no-gutenberg' ) . '</em></p>';
+		echo '<p><em>' . esc_html__( 'Note: The Site Editor and many theme features will not work properly while No Gutenberg? is active.', 'no-gutenberg' ) . '</em></p>';
 		echo '</div>';
 
 		delete_transient( 'ayudawp_fse_theme_activated_warning' );

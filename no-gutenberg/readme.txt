@@ -1,10 +1,10 @@
-=== No Gutenberg - Choose Where to Use the Block Editor or the Classic Editor ===
+=== No Gutenberg? - Choose Where to Use the Block Editor or the Classic Editor ===
 Contributors: fernandot, ayudawp
 Tags: gutenberg, classic editor, FSE, blocks, woocommerce
 Requires at least: 6.1
 Requires PHP: 7.4
-Tested up to: 7.0
-Stable tag: 2.3.0
+Tested up to: 7.1
+Stable tag: 2.3.1
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -178,8 +178,15 @@ Because it does not stop at the editor. Others disable the block editor and leav
 2. Classic Widgets interface instead of block widgets
 3. Activation success notice
 4. FSE theme activation warning
+5. Settings page
 
 == Changelog ==
+
+= 2.3.1 =
+* Improved: Tested up to WordPress 7.1, with no changes needed. The always iframed post editor, the persistent toolbar and the new client-side media processing headers only reach the block editor, and the Site Editor, Patterns and Fonts screens this plugin removes keep the same slugs
+* Improved: The plugin calls itself No Gutenberg? everywhere now, the same name it has on WordPress.org, instead of No Gutenberg in the plugins list, the Settings menu, its settings screen and its notices
+* Fix: Pages were loading the block styles and scripts of every plugin that registers blocks, even where no block appears. Removing the block CSS also turned off the on-demand loading that WordPress 6.8 tied to the same switch, so on a site with block plugins installed this plugin was adding weight instead of saving it
+* Fix: The Block widget is now really gone from the classic Widgets screen. The cleanup ran after WordPress had already registered it, so it stayed on the list
 
 = 2.3.0 =
 * New: Existing block content is protected. An entry that already contains blocks keeps the block editor whatever the rules say, so installing the plugin on a site with mixed content no longer sends that content to an editor that reflows its markup. A checkbox under the master switch gives the protection up when you really want the Classic Editor on everything
@@ -195,8 +202,8 @@ For older changelog entries, please check the [changelog.txt](https://plugins.sv
 
 == Upgrade Notice ==
 
-= 2.3.0 =
-Entries already built with blocks now keep the block editor, so the plugin cannot break existing content, and the entries list shows which ones they are. Updating changes nothing on your site: the protection is on for new installs only, and there is a checkbox to turn it on or off.
+= 2.3.1 =
+Compatible with WordPress 7.1. Fixes a real weight problem: pages loaded the block assets of every plugin that registers blocks, so this plugin could make a site heavier instead of lighter. The Block widget is gone from the classic Widgets screen too.
 
 == Support ==
 

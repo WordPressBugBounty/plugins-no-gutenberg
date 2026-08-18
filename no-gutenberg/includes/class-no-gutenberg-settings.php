@@ -61,8 +61,8 @@ class AyudaWP_No_Gutenberg_Settings {
 		}
 
 		self::$hook_suffix = add_options_page(
-			__( 'No Gutenberg', 'no-gutenberg' ),
-			__( 'No Gutenberg', 'no-gutenberg' ),
+			__( 'No Gutenberg?', 'no-gutenberg' ),
+			__( 'No Gutenberg?', 'no-gutenberg' ),
 			'manage_options',
 			AyudaWP_No_Gutenberg_Options::PAGE_SLUG,
 			array( __CLASS__, 'render_page' )
@@ -192,7 +192,7 @@ class AyudaWP_No_Gutenberg_Settings {
 		$locked  = AyudaWP_No_Gutenberg_Options::is_locked();
 		?>
 		<div class="wrap nogb-settings">
-			<h1><?php echo esc_html__( 'No Gutenberg', 'no-gutenberg' ); ?></h1>
+			<h1><?php echo esc_html__( 'No Gutenberg?', 'no-gutenberg' ); ?></h1>
 
 			<?php
 			self::render_status_panel();
@@ -338,7 +338,7 @@ class AyudaWP_No_Gutenberg_Settings {
 				<strong><?php echo esc_html__( 'Settings locked from wp-config.php', 'no-gutenberg' ); ?></strong>
 			</p>
 			<p>
-				<?php echo esc_html__( 'This configuration is fixed in code, so it cannot be changed from here. Remove the No Gutenberg constants from wp-config.php to edit it again.', 'no-gutenberg' ); ?>
+				<?php echo esc_html__( 'This configuration is fixed in code, so it cannot be changed from here. Remove the No Gutenberg? constants from wp-config.php to edit it again.', 'no-gutenberg' ); ?>
 			</p>
 		</div>
 		<?php

@@ -20,7 +20,7 @@ class AyudaWP_No_Gutenberg {
 	/**
 	 * Plugin version
 	 */
-	const VERSION = '2.3.0';
+	const VERSION = '2.3.1';
 
 	/**
 	 * Initialize the plugin
@@ -43,9 +43,13 @@ class AyudaWP_No_Gutenberg {
 			add_action( 'wp_dashboard_setup', array( __CLASS__, 'ayudawp_remove_dashboard_widgets' ) );
 		}
 
-		// Remove block-based widgets.
+		// Remove block-based widgets. Both hooks are registered while this file
+		// loads instead of from an init callback, because core fires widgets_init
+		// from init priority 1: an init callback would always arrive after the
+		// block widget has already been registered.
 		if ( AyudaWP_No_Gutenberg_Options::item_enabled( 'widgets' ) ) {
-			add_action( 'init', array( __CLASS__, 'ayudawp_disable_block_widgets' ) );
+			add_filter( 'use_widgets_block_editor', '__return_false' );
+			add_action( 'widgets_init', array( __CLASS__, 'ayudawp_remove_block_widgets' ) );
 		}
 
 		// Remove block patterns and block directory.
@@ -70,6 +74,12 @@ class AyudaWP_No_Gutenberg {
 			// Without this, every rendered core block prints its own inline
 			// stylesheet instead of the block library one.
 			add_filter( 'should_load_separate_core_block_assets', '__return_false' );
+
+			// Since WordPress 6.8 that same filter also decides whether block
+			// assets load on demand, so leaving it alone would make core enqueue
+			// the styles and scripts of every registered block on every page,
+			// third party blocks included, which is the opposite of the point.
+			add_filter( 'should_load_block_assets_on_demand', '__return_true' );
 		}
 
 		// Disable FSE features and theme.json processing. Both run late so they
@@ -197,17 +207,6 @@ class AyudaWP_No_Gutenberg {
 		remove_theme_support( 'custom-units' );
 		remove_theme_support( 'link-color' );
 		remove_theme_support( 'border' );
-	}
-
-	/**
-	 * Disable block-based widgets
-	 */
-	public static function ayudawp_disable_block_widgets() {
-		// Force classic widgets.
-		add_filter( 'use_widgets_block_editor', '__return_false' );
-
-		// Remove block widgets.
-		add_action( 'widgets_init', array( __CLASS__, 'ayudawp_remove_block_widgets' ) );
 	}
 
 	/**
