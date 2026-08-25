@@ -3,6 +3,12 @@ No Gutenberg - Choose Where to Use the Block Editor or the Classic Editor — Fu
 For each release, see the entries below. The latest version is always at the top.
 The current release notes also live in readme.txt under "== Changelog ==".
 
+= 2.3.2 =
+* Fix: Sites running Divi 5 got a fatal error on every frontend page. Removing the block widgets from the classic Widgets screen unregistered the Block widget itself, and Divi asks WordPress for it while deciding which stylesheets a page needs. The classic Widgets screen is restored the same way as before, without touching the widget
+* Fix: Block widgets already saved on a site stopped being rendered on the frontend and disappeared from the Widgets screen. Nothing was lost, they are back on update, but do not save the Widgets screen while running 2.3.1
+* Fix: Removed a filter removal that never did anything: the callback it named was never part of WordPress
+* Fix: The status panel said "1 still added by other plugins" when a single pattern was left, and gave translators two identical plural forms
+
 = 2.3.1 =
 * Improved: Tested up to WordPress 7.1, with no changes needed. The always iframed post editor, the persistent toolbar and the new client-side media processing headers only reach the block editor, and the Site Editor, Patterns and Fonts screens this plugin removes keep the same slugs
 * Improved: The plugin calls itself No Gutenberg? everywhere now, the same name it has on WordPress.org, instead of No Gutenberg in the plugins list, the Settings menu, its settings screen and its notices

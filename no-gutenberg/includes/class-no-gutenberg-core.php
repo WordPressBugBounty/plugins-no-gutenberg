@@ -20,7 +20,7 @@ class AyudaWP_No_Gutenberg {
 	/**
 	 * Plugin version
 	 */
-	const VERSION = '2.3.1';
+	const VERSION = '2.3.2';
 
 	/**
 	 * Initialize the plugin
@@ -43,13 +43,14 @@ class AyudaWP_No_Gutenberg {
 			add_action( 'wp_dashboard_setup', array( __CLASS__, 'ayudawp_remove_dashboard_widgets' ) );
 		}
 
-		// Remove block-based widgets. Both hooks are registered while this file
-		// loads instead of from an init callback, because core fires widgets_init
-		// from init priority 1: an init callback would always arrive after the
-		// block widget has already been registered.
+		// Restore the classic Widgets screen. The Block widget itself stays
+		// registered on purpose: unregistering it takes every block-N widget the
+		// site already has out of $wp_registered_widgets, so they stop being
+		// rendered on the frontend, and it makes get_widget_object( 'block' )
+		// return null to anything that asks, which is a state core never
+		// produces on its own.
 		if ( AyudaWP_No_Gutenberg_Options::item_enabled( 'widgets' ) ) {
 			add_filter( 'use_widgets_block_editor', '__return_false' );
-			add_action( 'widgets_init', array( __CLASS__, 'ayudawp_remove_block_widgets' ) );
 		}
 
 		// Remove block patterns and block directory.
@@ -210,17 +211,6 @@ class AyudaWP_No_Gutenberg {
 	}
 
 	/**
-	 * Remove block widgets
-	 */
-	public static function ayudawp_remove_block_widgets() {
-		global $wp_widget_factory;
-
-		if ( isset( $wp_widget_factory->widgets['WP_Widget_Block'] ) ) {
-			unregister_widget( 'WP_Widget_Block' );
-		}
-	}
-
-	/**
 	 * Disable block patterns and block directory
 	 *
 	 * Theme patterns are registered on init from the WordPress bootstrap, which
@@ -377,14 +367,14 @@ class AyudaWP_No_Gutenberg {
 		add_filter( 'wp_theme_json_data_theme', array( __CLASS__, 'ayudawp_return_empty_theme_json' ) );
 		add_filter( 'wp_theme_json_data_user', array( __CLASS__, 'ayudawp_return_empty_theme_json' ) );
 
-		// Remove duotone support.
+		// Remove duotone support. Only reaches WordPress 6.1 and 6.2: from 6.3
+		// the callback is WP_Duotone::render_duotone_support and this one lives
+		// in deprecated.php, unhooked. It stays until the minimum required
+		// version leaves 6.2 behind, and then it can go.
 		remove_filter( 'render_block', 'wp_render_duotone_support' );
 
 		// Remove layout support.
 		remove_filter( 'render_block', 'wp_render_layout_support_flag' );
-
-		// Remove spacing support.
-		remove_filter( 'render_block', 'wp_render_spacing_support_flag' );
 	}
 
 	/**

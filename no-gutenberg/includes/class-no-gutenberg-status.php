@@ -66,7 +66,7 @@ class AyudaWP_No_Gutenberg_Status {
 			$patterns_value = sprintf(
 				/* translators: %d: number of block patterns other plugins keep registered. */
 				_n(
-					'Core and theme patterns removed, %d still added by other plugins',
+					'Core and theme patterns removed, %d still added by another plugin',
 					'Core and theme patterns removed, %d still added by other plugins',
 					$patterns,
 					'no-gutenberg'

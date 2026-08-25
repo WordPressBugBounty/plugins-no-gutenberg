@@ -3,7 +3,7 @@
  * Plugin Name: No Gutenberg? - Choose Where to Use the Block Editor or the Classic Editor
  * Plugin URI: https://servicios.ayudawp.com/
  * Description: Complete elimination of Gutenberg Block Editor, FSE Global Styles, Block Widgets, Patterns, and WooCommerce blocks. Get back to the reliable Classic Editor with zero block-related overhead.
- * Version: 2.3.1
+ * Version: 2.3.2
  * Author: Fernando Tellado
  * Author URI: https://ayudawp.com/
  *

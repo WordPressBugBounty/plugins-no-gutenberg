@@ -4,7 +4,7 @@ Tags: gutenberg, classic editor, FSE, blocks, woocommerce
 Requires at least: 6.1
 Requires PHP: 7.4
 Tested up to: 7.1
-Stable tag: 2.3.1
+Stable tag: 2.3.2
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,17 +26,15 @@ The most configurable way to leave the block editor behind. Activate it and ever
 * Site Editor functionality
 
 = Performance Optimizations =
-* Removes all block-related CSS and JavaScript files
-* Eliminates Global Styles inline CSS on every page
-* Removes unused block library assets
-* Disables block editor admin assets
-* Removes duotone and layout support filters
+* The block library CSS and JavaScript that every page loads
+* The Global Styles inline CSS, which dequeuing the handle never reaches
+* The block assets of any other plugin that registers blocks, on pages where no block appears
+* The block editor assets in the admin, wherever the Classic Editor is the one opening
 
 = WooCommerce Integration =
-* Disables WooCommerce block-based checkout and cart
-* Removes WooCommerce block editor for products
-* Eliminates WooCommerce block assets and styles
-* Forces classic WooCommerce experience
+* The block based product editor, which follows the same rules as any other post type
+* The WooCommerce block styles and scripts, removed along with the rest of the block assets
+* Nothing else: leave blocks on for products and the block product editor keeps working
 
 = Admin Experience =
 * Removes the welcome panel that promotes the block editor
@@ -47,9 +45,9 @@ The most configurable way to leave the block editor behind. Activate it and ever
 * Warns you when a block theme is active
 * Adds settings and support links to plugin actions
 
-**Zero configuration required** - Activate the plugin and everything is disabled right away. No setup needed because it just works!
+**A default that asks nothing, and a settings page for everything else** - Activating the plugin disables the block editor and every block feature across the site, which is what most people install it for. The rest of this page is about wanting less than that.
 
-**Full control when you need it** - There is an optional setup page under Settings > No Gutenberg, built around one master switch. Leave it on and the plugin behaves exactly as it always did. Turn it off and you decide where the block editor goes away: by post type, by user role, by page template or by individual entry. The site wide pieces (classic widgets, block patterns, frontend block assets, theme.json and the Site Editor) are then yours to keep or remove one by one. Every checkbox means the same thing, so no setting ever undoes another one.
+**Full control when you need it** - The settings page lives under Settings > No Gutenberg?, built around one master switch. Leave it on and the whole site keeps the complete disable. Turn it off and you decide where the block editor goes away: by post type, by user role, by page template or by individual entry. The site wide pieces (classic widgets, block patterns, frontend block assets, theme.json and the Site Editor) are then yours to keep or remove one by one. Every checkbox means the same thing, so no setting ever undoes another one.
 
 **Switch editors entry by entry, where it makes sense** - Editor switching is chosen per post type, right next to the rule that disables the block editor. Enable it for pages, for instance, and every page gets "Edit (Classic)" and "Edit (Blocks)" links in the list plus a switch inside both editors, while your posts stay untouched. Each entry remembers the editor chosen for it, and that choice beats the rules in both directions: one landing page can stay on the Classic Editor while the rest keep blocks, or the other way around.
 
@@ -92,13 +90,12 @@ define(
 
 The keys are the settings on the screen. complete, widgets, patterns, frontend_css, theme_json, site_editor and fse_notices take true or false, while disable_post_types, disable_roles, disable_templates and switch_post_types take an array of slugs, and disable_ids an array of entry IDs. Any key you leave out keeps the value stored on the site. Note that defining NO_GUTENBERG_OPTIONS already turns the whole screen read only, so NO_GUTENBERG_LOCK_SETTINGS is not needed on top of it.
 
-This plugin is perfect for:
-- Users who prefer the Classic Editor
-- Sites requiring maximum compatibility with legacy themes and plugins
-- Performance-focused installations
-- Users who want to eliminate block-related overhead completely
-- Sites that need the Classic Editor for everyone except a few post types or editors
-- Multisite networks that want the same editing experience on every site
+It fits sites that:
+- Work better in the Classic Editor and want it back
+- Run classic themes and plugins that were never built around blocks
+- Are paying for block CSS and JavaScript on pages with no blocks in them
+- Need the Classic Editor for everyone except a few post types, roles or people
+- Are a multisite network that wants the same editing experience on every site
 
 == Installation ==
 
@@ -106,7 +103,7 @@ This plugin is perfect for:
 2. Download the plugin from WP repository
 3. Upload the 'no-gutenberg' folder to the '/wp-content/plugins/' directory
 4. Activate the plugin through the 'Plugins' menu in WordPress
-5. That's it! Gutenberg is completely gone and Classic Editor is restored
+5. That is it. The block editor is disabled across the site and the Classic Editor is back
 
 On a multisite network you can also Network Activate it, so it runs on every site of the network at once. Settings stay per site, and the description explains how to configure the whole network from wp-config.php.
 
@@ -114,11 +111,11 @@ On a multisite network you can also Network Activate it, so it runs on every sit
 
 = Do I have to configure anything? =
 
-No. The plugin disables everything as soon as you activate it, exactly as it always did. The settings page under Settings > No Gutenberg is there only if you want to bring some part of the block editor back.
+No. Activating the plugin disables everything across the site. The settings page under Settings > No Gutenberg? is there only if you want to bring some part of the block editor back.
 
 = Can I disable Gutenberg only for some content or some people? =
 
-Yes. Go to Settings > No Gutenberg, uncheck "Disable Gutenberg completely", and then choose where the block editor should go away: post types, user roles, page templates or individual entry IDs. Rules are independent, so anything that matches gets the Classic Editor and everything else keeps working as usual.
+Yes. Go to Settings > No Gutenberg?, uncheck "Disable Gutenberg completely", and then choose where the block editor should go away: post types, user roles, page templates or individual entry IDs. Rules are independent, so anything that matches gets the Classic Editor and everything else keeps working as usual.
 
 = Can I disable just one part of Gutenberg? =
 
@@ -130,11 +127,11 @@ That is exactly why the plugin unchecks the frontend block assets and theme.json
 
 = Can I lock the configuration so a client cannot change it? =
 
-Yes, from wp-config.php. `define( 'NO_GUTENBERG_LOCK_SETTINGS', true );` leaves Settings > No Gutenberg visible but read only, and `define( 'NO_GUTENBERG_HIDE_SETTINGS', true );` takes it out of the menu. To fix the configuration itself, and not only lock the screen, there is NO_GUTENBERG_OPTIONS. The description has the three of them together, with the settings you can fix and the details worth knowing.
+Yes, from wp-config.php. `define( 'NO_GUTENBERG_LOCK_SETTINGS', true );` leaves Settings > No Gutenberg? visible but read only, and `define( 'NO_GUTENBERG_HIDE_SETTINGS', true );` takes it out of the menu. To fix the configuration itself, and not only lock the screen, there is NO_GUTENBERG_OPTIONS. The description has the three of them together, with the settings you can fix and the details worth knowing.
 
 = Does it work on a multisite network? =
 
-Yes, and it is what the plugin is best at. Activate it site by site, or Network Activate it and it runs on every site of the network. Settings are stored per site, so each site has its own Settings > No Gutenberg and each site administrator manages their own.
+Yes, and it is what the plugin is best at. Activate it site by site, or Network Activate it and it runs on every site of the network. Settings are stored per site, so each site has its own Settings > No Gutenberg? and each site administrator manages their own.
 
 For the whole network at once, the place is wp-config.php, the same file every site reads: what you define there reaches all of them, covers every setting the plugin has and wins over whatever each site has stored. There is no network settings screen, because that file does the job for the entire network in a couple of lines. They are in the description, under "One configuration for a whole network, or for a site you deliver".
 
@@ -158,11 +155,11 @@ Yes. Uncheck the content protection under the master switch, on the settings pag
 
 = What happens if I deactivate the plugin? =
 
-All Gutenberg functionality will be restored immediately. Your site will return to using the block editor and all block-related features.
+Everything comes back immediately: the block editor, Global Styles, the patterns and the block assets. Your content is exactly as it was, because the plugin never rewrote any of it.
 
-= Is this compatible with all themes and plugins? =
+= Is this compatible with my theme and my plugins? =
 
-Yes. This plugin is designed for maximum compatibility. It works with all properly coded themes and plugins by simply removing block functionality rather than conflicting with it.
+With classic themes, and with plugins that do not depend on blocks, yes: it removes block features instead of fighting them for control. Block themes are the exception, and there is a question about them right below. A plugin that registers blocks of its own keeps working, but those blocks lose their styles on the frontend if you remove the block assets, which is what the status panel is there to warn you about.
 
 = Can I use it with a block theme? =
 
@@ -181,6 +178,12 @@ Because it does not stop at the editor. Others disable the block editor and leav
 5. Settings page
 
 == Changelog ==
+
+= 2.3.2 =
+* Fix: Sites running Divi 5 got a fatal error on every frontend page. Removing the block widgets from the classic Widgets screen unregistered the Block widget itself, and Divi asks WordPress for it while deciding which stylesheets a page needs. The classic Widgets screen is restored the same way as before, without touching the widget
+* Fix: Block widgets already saved on a site stopped being rendered on the frontend and disappeared from the Widgets screen. Nothing was lost, they are back on update, but do not save the Widgets screen while running 2.3.1
+* Fix: Removed a filter removal that never did anything: the callback it named was never part of WordPress
+* Fix: The status panel said "1 still added by other plugins" when a single pattern was left, and gave translators two identical plural forms
 
 = 2.3.1 =
 * Improved: Tested up to WordPress 7.1, with no changes needed. The always iframed post editor, the persistent toolbar and the new client-side media processing headers only reach the block editor, and the Site Editor, Patterns and Fonts screens this plugin removes keep the same slugs
@@ -202,8 +205,8 @@ For older changelog entries, please check the [changelog.txt](https://plugins.sv
 
 == Upgrade Notice ==
 
-= 2.3.1 =
-Compatible with WordPress 7.1. Fixes a real weight problem: pages loaded the block assets of every plugin that registers blocks, so this plugin could make a site heavier instead of lighter. The Block widget is gone from the classic Widgets screen too.
+= 2.3.2 =
+Fixes a fatal error on every frontend page of sites running Divi 5, and restores the block widgets that 2.3.1 stopped rendering. Nothing was lost: they come back on update. If you are on 2.3.1, update before saving the Widgets screen.
 
 == Support ==
 
