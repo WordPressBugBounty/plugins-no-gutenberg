@@ -29,6 +29,16 @@ class AyudaWP_No_Gutenberg_Options {
 	const VERSION_OPTION = 'ayudawp_no_gutenberg_version';
 
 	/**
+	 * Option storing the Classic Editor configuration found when installing.
+	 */
+	const CLASSIC_EDITOR_SNAPSHOT = 'ayudawp_no_gutenberg_classic_editor';
+
+	/**
+	 * Network option recording that this plugin was activated for the network.
+	 */
+	const NETWORK_INSTALL_OPTION = 'ayudawp_no_gutenberg_network_install';
+
+	/**
 	 * Settings group used by the Settings API.
 	 */
 	const OPTION_GROUP = 'ayudawp_no_gutenberg';
@@ -71,7 +81,11 @@ class AyudaWP_No_Gutenberg_Options {
 			// Post types whose entries can be opened with the other editor.
 			'switch_post_types'  => array(),
 
-			// Site wide items. They are not tied to any post type.
+			// Site wide items. They are not tied to any post type. The two that
+			// decide how the frontend renders, frontend_css and theme_json, are
+			// true here because that is the right answer for a site with no
+			// block content. install_defaults() turns them off on a site that
+			// does have it, which is the only moment that can be known.
 			'widgets'            => true,
 			'patterns'           => true,
 			'frontend_css'       => true,
@@ -284,6 +298,114 @@ class AyudaWP_No_Gutenberg_Options {
 	}
 
 	/**
+	 * Whether anything on this site renders through the block styles.
+	 *
+	 * Removing the block CSS and emptying theme.json costs nothing on a site
+	 * that never used blocks, and is destructive on one that did: the entries
+	 * are still there and they render with no styles, no layout and no presets.
+	 * A block theme is the same problem one step further, because everything it
+	 * paints comes out of theme.json.
+	 *
+	 * @return bool
+	 */
+	public static function content_needs_block_styles() {
+		if ( function_exists( 'wp_is_block_theme' ) && wp_is_block_theme() ) {
+			return true;
+		}
+
+		self::load_status();
+
+		return class_exists( 'AyudaWP_No_Gutenberg_Status' )
+			&& AyudaWP_No_Gutenberg_Status::has_block_content();
+	}
+
+	/**
+	 * Load the status class, which only loads itself in the admin area.
+	 *
+	 * Activation through WP-CLI runs with is_admin() false, and that is exactly
+	 * when the count of block content has to be available, because it decides
+	 * the defaults the install is written with.
+	 */
+	private static function load_status() {
+		if ( class_exists( 'AyudaWP_No_Gutenberg_Status' ) || ! defined( 'AYUDAWP_NO_GUTENBERG_DIR' ) ) {
+			return;
+		}
+
+		require_once AYUDAWP_NO_GUTENBERG_DIR . 'includes/class-no-gutenberg-status.php';
+	}
+
+	/**
+	 * Uncheck the items that would leave existing block content unstyled.
+	 *
+	 * Every path where this plugin writes a configuration on somebody's behalf
+	 * goes through here, so no automatic decision of its own can be the one
+	 * that breaks the look of a site.
+	 *
+	 * @param array $options Options to adjust.
+	 * @return array
+	 */
+	public static function with_content_coherence( $options ) {
+		if ( ! self::content_needs_block_styles() ) {
+			return $options;
+		}
+
+		foreach ( self::content_dependent_items() as $item ) {
+			$options[ $item ] = false;
+		}
+
+		return $options;
+	}
+
+	/**
+	 * Defaults for a brand new install, adjusted to what the site already has.
+	 *
+	 * The master switch stays on, so the promise of the plugin is intact and
+	 * every entry that is not built with blocks opens in the Classic Editor.
+	 * What no longer happens is stripping the styles off content that is
+	 * already published: on a site with block content, or with a block theme,
+	 * the two items that would leave it unstyled start unchecked and the
+	 * settings page says why.
+	 *
+	 * @return array
+	 */
+	public static function install_defaults() {
+		return self::with_content_coherence( self::defaults() );
+	}
+
+	/**
+	 * Post types a rule can name: the ones with a UI and an editor.
+	 *
+	 * Reusable blocks, templates and the rest of the internal types have no
+	 * place in a rule, and neither has anything with no editor to replace.
+	 *
+	 * @return array List of post type slugs.
+	 */
+	public static function manageable_post_types() {
+		$internal = array(
+			'attachment',
+			'wp_block',
+			'wp_template',
+			'wp_template_part',
+			'wp_global_styles',
+			'wp_navigation',
+			'wp_font_family',
+			'wp_font_face',
+		);
+
+		$slugs = array();
+
+		foreach ( get_post_types( array( 'show_ui' => true ) ) as $post_type ) {
+			if ( in_array( $post_type, $internal, true ) || ! post_type_supports( $post_type, 'editor' ) ) {
+				continue;
+			}
+
+			$slugs[] = $post_type;
+		}
+
+		return $slugs;
+	}
+
+	/**
 	 * Get every option merged with its default.
 	 *
 	 * Values forced from wp-config.php through the NO_GUTENBERG_OPTIONS
@@ -293,13 +415,30 @@ class AyudaWP_No_Gutenberg_Options {
 	 */
 	public static function get() {
 		if ( null === self::$options ) {
-			$stored = get_option( self::OPTION_NAME, array() );
+			$stored = get_option( self::OPTION_NAME, false );
+			$blank  = false === $stored;
 
 			if ( ! is_array( $stored ) ) {
 				$stored = array();
 			}
 
-			$options = wp_parse_args( $stored, self::defaults() );
+			$defaults = self::defaults();
+
+			if ( $blank ) {
+				// Nothing has been configured here, so nothing has looked at
+				// whether this site needs the block styles. Until something
+				// does, the two items that can leave published content unstyled
+				// stay off: a site that did not need them carries a few KB for
+				// a while, and one that did keeps its look. It happens on a
+				// site of a network activation until somebody opens its admin,
+				// and that can be never. Deciding it by the content here is not
+				// an option: this runs on every request of the site.
+				foreach ( self::content_dependent_items() as $item ) {
+					$defaults[ $item ] = false;
+				}
+			}
+
+			$options = wp_parse_args( $stored, $defaults );
 
 			if ( self::has_forced_options() ) {
 				$options = wp_parse_args( self::sanitize( NO_GUTENBERG_OPTIONS, false ), $options );
@@ -392,17 +531,18 @@ class AyudaWP_No_Gutenberg_Options {
 	/**
 	 * Whether a site wide item is disabled.
 	 *
-	 * The master switch turns every item on, so partial configurations can only
-	 * exist once it is off.
+	 * Each item answers for itself, master switch or not. Until 2.4.0 a
+	 * complete disable forced every one of them on, which left two of them
+	 * unreachable: the items that strip the block styles off the frontend could
+	 * never be turned off on a site with block content, because the default
+	 * configuration is precisely a complete disable. Independence is also what
+	 * lets the settings page show the real state of the site instead of hiding
+	 * the section behind the master switch.
 	 *
 	 * @param string $item Item key.
 	 * @return bool
 	 */
 	public static function item_enabled( $item ) {
-		if ( self::is_complete() ) {
-			return true;
-		}
-
 		$options = self::get();
 
 		return ! empty( $options[ $item ] );
@@ -516,11 +656,35 @@ class AyudaWP_No_Gutenberg_Options {
 			&& false === get_option( self::OPTION_NAME, false );
 
 		if ( $fresh ) {
-			update_option( self::VERSION_OPTION, AyudaWP_No_Gutenberg::VERSION );
+			self::install_fresh();
+
 			return;
 		}
 
 		self::maybe_upgrade();
+	}
+
+	/**
+	 * Write the configuration of a site that has never run this plugin.
+	 */
+	private static function install_fresh() {
+		// The count of block content decides two of the defaults, and it is
+		// cached for twelve hours, so a transient left behind by an earlier
+		// install of this same plugin has to go before anybody reads it.
+		self::load_status();
+
+		if ( class_exists( 'AyudaWP_No_Gutenberg_Status' ) ) {
+			AyudaWP_No_Gutenberg_Status::flush_content_cache();
+		}
+
+		// The row is written instead of being left to the defaults for two
+		// reasons: the defaults of this site are not the defaults of the
+		// class, because block content changes two of them, and an option
+		// that does not exist costs a query on every request of the site.
+		update_option( self::OPTION_NAME, self::install_defaults() );
+		update_option( self::VERSION_OPTION, AyudaWP_No_Gutenberg::VERSION );
+		self::store_classic_editor_snapshot();
+		self::flush_cache();
 	}
 
 	/**
@@ -530,6 +694,12 @@ class AyudaWP_No_Gutenberg_Options {
 	 * the Classic Editor, block content included. A site running that way is
 	 * already living with it, so the new default is only for sites installing
 	 * the plugin from now on: an update never changes which editor opens.
+	 *
+	 * A subsite of a network activation arrives here too, and it is the exact
+	 * opposite case: nothing was running here before, so there is nothing to
+	 * preserve. It is told apart by the mark this plugin leaves on the network
+	 * when it is activated, because from inside the subsite both look the same,
+	 * an install with no version and no row.
 	 */
 	public static function maybe_upgrade() {
 		$stored = get_option( self::VERSION_OPTION, '' );
@@ -539,7 +709,18 @@ class AyudaWP_No_Gutenberg_Options {
 		}
 
 		if ( '' === $stored || false === $stored ) {
-			$options = get_option( self::OPTION_NAME, array() );
+			$options = get_option( self::OPTION_NAME, false );
+
+			// Never configured here, and the network was activated by a version
+			// that leaves the mark: this is a site of that network being opened
+			// for the first time, so it gets the defaults of this site. Without
+			// this, it used to get the pre-2.3.0 behavior, which is the one that
+			// leaves block content unprotected and unstyled.
+			if ( false === $options && self::network_install_marked() ) {
+				self::install_fresh();
+
+				return;
+			}
 
 			if ( ! is_array( $options ) ) {
 				$options = array();
@@ -551,8 +732,227 @@ class AyudaWP_No_Gutenberg_Options {
 			}
 		}
 
+		self::migrate_unstyled_content();
+
 		update_option( self::VERSION_OPTION, AyudaWP_No_Gutenberg::VERSION );
 		self::flush_cache();
+	}
+
+	/**
+	 * Give the block styles back to a site that never chose to lose them.
+	 *
+	 * Runs once per version, from maybe_upgrade(). Until 2.4.0 the master
+	 * switch forced every site wide item on while it was checked, so on a site
+	 * with the master switch on nobody chose to remove the block styles: the
+	 * code did it, the stored value could not even be read back, and the
+	 * settings page showed a state that was not the real one. Those sites have
+	 * been serving their block content with no styles, no layout and no
+	 * presets, and an update that only fixed new installs would have left them
+	 * exactly as they were.
+	 *
+	 * A site with the master switch off did choose, because there the stored
+	 * values were honored and the page showed them. Those are left alone, and
+	 * the settings page warns about them with the number of entries affected.
+	 */
+	private static function migrate_unstyled_content() {
+		// With the configuration forced from wp-config.php, the stored row is
+		// not what the site runs on, so rewriting it would say one thing while
+		// the site does another.
+		if ( self::has_forced_options() ) {
+			return;
+		}
+
+		$stored = get_option( self::OPTION_NAME, false );
+
+		if ( ! is_array( $stored ) ) {
+			return;
+		}
+
+		$options = wp_parse_args( $stored, self::defaults() );
+
+		if ( empty( $options['complete'] ) ) {
+			return;
+		}
+
+		$coherent = self::with_content_coherence( $options );
+
+		if ( $coherent === $options ) {
+			return;
+		}
+
+		update_option( self::OPTION_NAME, $coherent );
+		self::flush_cache();
+	}
+
+	/**
+	 * Mark the network as activated by a version that knows about its sites.
+	 *
+	 * Called from the activation hook, which core fires once for a network
+	 * activation, and for the site the network administrator happened to be on
+	 * (`wp-admin/includes/plugin.php:709` in 7.1.3). Every other site of the
+	 * network gets here with nothing stored, and from inside one of them that
+	 * is indistinguishable from a site that has been running an older version
+	 * of this plugin all along. This mark is the difference.
+	 *
+	 * It is a network option, and the only thing that writes it is the
+	 * activation of the plugin for the whole network, which core already
+	 * reserves for a network administrator.
+	 */
+	public static function mark_network_install() {
+		if ( ! is_multisite() ) {
+			return;
+		}
+
+		update_site_option( self::NETWORK_INSTALL_OPTION, AyudaWP_No_Gutenberg::VERSION );
+	}
+
+	/**
+	 * Whether this network carries that mark.
+	 *
+	 * @return bool
+	 */
+	private static function network_install_marked() {
+		return is_multisite() && (bool) get_site_option( self::NETWORK_INSTALL_OPTION, false );
+	}
+
+	/**
+	 * Classic Editor configuration found on this site, if there is any.
+	 *
+	 * Classic Editor deletes its own options on uninstall, so this is read once
+	 * and stored: asking later would find nothing on a site that got rid of it
+	 * in the meantime, which is the most common way of landing here.
+	 *
+	 * @return array Empty when there was nothing to read.
+	 */
+	public static function read_classic_editor_options() {
+		$replace = get_option( 'classic-editor-replace', false );
+
+		if ( ! is_string( $replace ) || '' === $replace ) {
+			return array();
+		}
+
+		// The two older spellings its own code still accepts.
+		$aliases = array(
+			'replace'    => 'classic',
+			'no-replace' => 'block',
+		);
+
+		$replace = isset( $aliases[ $replace ] ) ? $aliases[ $replace ] : $replace;
+
+		if ( ! in_array( $replace, array( 'classic', 'block' ), true ) ) {
+			return array();
+		}
+
+		return array(
+			'replace' => $replace,
+			'allow'   => 'allow' === get_option( 'classic-editor-allow-users', 'disallow' ),
+		);
+	}
+
+	/**
+	 * Store the Classic Editor configuration, to offer importing it later.
+	 *
+	 * Nothing is applied here. Importing in silence would be wrong in both
+	 * directions: a site that had the block editor by default would install a
+	 * plugin called No Gutenberg and see nothing change, and a site that had
+	 * the Classic Editor everywhere already gets that from the defaults.
+	 */
+	public static function store_classic_editor_snapshot() {
+		$detected = self::read_classic_editor_options();
+
+		if ( ! $detected ) {
+			return;
+		}
+
+		// Classic Editor with its own defaults, the Classic Editor everywhere
+		// and no way out, is what this plugin does out of the box. There is
+		// nothing to offer, so there is nothing to ask about either.
+		if ( 'classic' === $detected['replace'] && ! $detected['allow'] ) {
+			return;
+		}
+
+		// Sin autocarga a propósito: solo se lee en la pantalla de ajustes y en
+		// su handler, así que no tiene por qué viajar en alloptions en cada
+		// petición del sitio.
+		update_option( self::CLASSIC_EDITOR_SNAPSHOT, $detected, false );
+	}
+
+	/**
+	 * The stored Classic Editor configuration waiting to be imported.
+	 *
+	 * @return array Empty when there is nothing pending.
+	 */
+	public static function pending_classic_editor_import() {
+		$stored = get_option( self::CLASSIC_EDITOR_SNAPSHOT, array() );
+
+		if ( ! is_array( $stored ) || empty( $stored['replace'] ) ) {
+			return array();
+		}
+
+		return array(
+			'replace' => 'block' === $stored['replace'] ? 'block' : 'classic',
+			'allow'   => ! empty( $stored['allow'] ),
+		);
+	}
+
+	/**
+	 * Forget the pending import, whether it was applied or dismissed.
+	 */
+	public static function forget_classic_editor_import() {
+		delete_option( self::CLASSIC_EDITOR_SNAPSHOT );
+	}
+
+	/**
+	 * This plugin's configuration that reproduces a Classic Editor setup.
+	 *
+	 * The equivalence is approximate on purpose, and the notice that offers it
+	 * says so: the per user preference of Classic Editor has no counterpart
+	 * here, and the site wide items of this plugin have no counterpart there,
+	 * so they are left exactly as they are.
+	 *
+	 * @param array $detected Configuration as Classic Editor had it.
+	 * @return array Options ready to be stored.
+	 */
+	public static function classic_editor_equivalent( $detected ) {
+		$options    = self::get();
+		$post_types = self::manageable_post_types();
+
+		// Classic Editor has no master switch: everything it does is said post
+		// type by post type, so the import lands in selective mode even when it
+		// ends up covering every post type of the site.
+		$options['complete']           = false;
+		$options['disable_post_types'] = 'classic' === $detected['replace'] ? $post_types : array();
+		$options['disable_roles']      = array();
+		$options['disable_templates']  = array();
+		$options['disable_ids']        = array();
+		$options['switch_post_types']  = empty( $detected['allow'] ) ? array() : $post_types;
+
+		return self::with_content_coherence( $options );
+	}
+
+	/**
+	 * Whether Classic Editor is running at the same time, which is a conflict.
+	 *
+	 * Two plugins filtering use_block_editor_for_post with their own rules, and
+	 * the last one to run decides. Nothing is disabled automatically: it is
+	 * said out loud on the settings page and the site decides.
+	 *
+	 * Asked two ways because neither covers everything on its own: the path is
+	 * the only thing that answers before that plugin has loaded its own code,
+	 * and the class is what still answers if somebody renamed the folder.
+	 *
+	 * @return bool
+	 */
+	public static function classic_editor_active() {
+		if ( class_exists( 'Classic_Editor' ) ) {
+			return true;
+		}
+
+		if ( ! function_exists( 'is_plugin_active' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
+		return is_plugin_active( 'classic-editor/classic-editor.php' );
 	}
 
 	/**
@@ -611,15 +1011,6 @@ class AyudaWP_No_Gutenberg_Options {
 
 		if ( $with_defaults || array_key_exists( 'disable_ids', $input ) ) {
 			$clean['disable_ids'] = self::sanitize_ids( isset( $input['disable_ids'] ) ? $input['disable_ids'] : array() );
-		}
-
-		// A complete disable already covers every site wide item. Storing them
-		// as enabled keeps the state coherent if the master switch is turned
-		// off later, so nothing silently comes back unchecked.
-		if ( $with_defaults && ! empty( $clean['complete'] ) ) {
-			foreach ( self::site_items() as $item ) {
-				$clean[ $item ] = true;
-			}
 		}
 
 		return $clean;

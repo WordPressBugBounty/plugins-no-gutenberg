@@ -4,12 +4,28 @@
  * Loaded only on Settings > No Gutenberg.
  */
 
+/* One width for the whole page. Every block of the page is a direct child of
+   this box and none of them carries a horizontal margin, so they all start and
+   end on the same pixel whatever the window is. That is also why no box on this
+   page uses the core notice classes: common.js moves every div.notice to just
+   after the page title (wp-admin/js/common.js:1090 in 7.1.3), which would take
+   it out of here and give it a width of its own. */
+.nogb-page {
+	max-width: 1144px;
+}
+
+.nogb-settings .nogb-page > .nogb-status,
+.nogb-settings .nogb-page > .nogb-import,
+.nogb-settings .nogb-page > .nogb-lock-notice {
+	margin: 0 0 20px;
+}
+
 /* Two column layout: settings on the left, services on the right */
 .nogb-layout {
 	display: flex;
 	gap: 24px;
 	align-items: flex-start;
-	margin-top: 10px;
+	margin: 0;
 }
 
 .nogb-main {
@@ -23,19 +39,28 @@
 	width: 300px;
 }
 
-/* Status panel */
+/* Status panel. A panel, not a notice: it is the permanent answer to what the
+   plugin is doing here, it is read on every visit and it is never dismissed. */
 .nogb-status {
 	background: #fff;
 	border: 1px solid #c3c4c7;
-	border-left: 4px solid #2271b1;
-	padding: 4px 20px 16px;
-	margin: 20px 0;
-	max-width: 1144px;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+	padding: 0;
 }
 
 .nogb-status h2 {
+	display: flex;
+	align-items: center;
+	gap: 8px;
 	font-size: 14px;
-	margin: 14px 0 10px;
+	margin: 0;
+	padding: 12px 20px;
+	background: #f6f7f7;
+	border-bottom: 1px solid #dcdcde;
+}
+
+.nogb-status h2 .dashicons {
+	color: #2271b1;
 }
 
 .nogb-status-table {
@@ -46,7 +71,7 @@
 .nogb-status-table th,
 .nogb-status-table td {
 	text-align: left;
-	padding: 6px 0;
+	padding: 9px 20px;
 	font-size: 13px;
 	font-weight: 400;
 	vertical-align: top;
@@ -93,6 +118,32 @@
 
 .nogb-settings .nogb-master .description {
 	margin: 8px 0 0 24px;
+}
+
+/* The rules and the site wide items, in the same box as everything else on the
+   page. Loose text on the grey background was the third width of the page. */
+.nogb-settings .nogb-scope {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+	padding: 4px 20px 16px;
+}
+
+.nogb-settings .nogb-scope h2 {
+	font-size: 14px;
+	margin: 16px 0 6px;
+	padding: 0;
+}
+
+.nogb-settings .nogb-scope h2.nogb-section {
+	margin-top: 28px;
+	padding-top: 20px;
+	border-top: 1px solid #dcdcde;
+}
+
+.nogb-settings .nogb-scope .form-table th {
+	padding-left: 0;
+	width: 180px;
 }
 
 /* Content protection: applies whatever the master switch is set to */
@@ -160,8 +211,82 @@
 	border-left: 4px solid #dba617;
 }
 
+.nogb-settings .nogb-inline-note {
+	padding: 8px 12px;
+	background: #f0f6fc;
+	border-left: 4px solid #72aee6;
+	color: #50575e;
+}
+
+/* Both notes are hidden and shown from PHP and from the script, and the
+   attribute has to beat whatever display the rules above give them. */
+.nogb-settings .nogb-inline-notice[hidden],
+.nogb-settings .nogb-inline-note[hidden] {
+	display: none;
+}
+
+/* The Classic Editor import, which is a decision to settle and really does go
+   away: the accent on the left says temporary, the status panel no longer does. */
+.nogb-settings .nogb-import {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-left: 4px solid #72aee6;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+	padding: 4px 20px 12px;
+}
+
+.nogb-settings .nogb-import h2 {
+	font-size: 14px;
+	margin: 14px 0 8px;
+	padding: 0;
+}
+
+.nogb-settings .nogb-import h3 {
+	font-size: 13px;
+	margin: 20px 0 4px;
+}
+
+.nogb-settings .nogb-import p,
+.nogb-settings .nogb-import .description {
+	max-width: 90ch;
+}
+
+.nogb-import-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.nogb-import-table th,
+.nogb-import-table td {
+	text-align: left;
+	padding: 8px 16px 8px 0;
+	font-size: 13px;
+	vertical-align: top;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.nogb-import-table th {
+	width: 28%;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.nogb-import-table td {
+	font-weight: 400;
+	color: #3c434a;
+}
+
+.nogb-import-table tr:last-child th,
+.nogb-import-table tr:last-child td {
+	border-bottom: 0;
+}
+
 .nogb-settings .nogb-lock-notice {
-	max-width: 1144px;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-left: 4px solid #dba617;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+	padding: 4px 20px 8px;
 }
 
 .nogb-settings .nogb-checklist label {
@@ -246,6 +371,10 @@
 @media screen and (max-width: 782px) {
 	.nogb-status-table th {
 		width: 50%;
+	}
+
+	.nogb-import-table th {
+		width: 40%;
 	}
 }
 

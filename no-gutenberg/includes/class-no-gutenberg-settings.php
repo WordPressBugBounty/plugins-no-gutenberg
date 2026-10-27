@@ -3,10 +3,15 @@
  * Settings page: Settings > No Gutenberg.
  *
  * The screen is built around scope, not around a list of modules: one master
- * switch that disables Gutenberg everywhere, and, once it is off, the rules
- * that say where to disable the block editor plus the site wide items. Every
- * checkbox has the same meaning, checked means disabled, so there is never a
- * setting that undoes another one.
+ * switch that disables the block editor everywhere, the rules that say where to
+ * disable it when the master switch is off, and the items that belong to the
+ * whole site. Every checkbox has the same meaning, checked means disabled, so
+ * there is never a setting that undoes another one.
+ *
+ * Everything is on screen at all times. Until 2.4.0 the master switch hid the
+ * rest of the page, which read as "there is nothing else to decide" while the
+ * plugin was deciding plenty, two of them able to strip the styles off content
+ * that is already published.
  *
  * @package No Gutenberg
  * @since 2.2.0
@@ -27,20 +32,9 @@ class AyudaWP_No_Gutenberg_Settings {
 	private static $hook_suffix = '';
 
 	/**
-	 * Post types that never make sense as a rule.
-	 *
-	 * @var array
+	 * Action name of the Classic Editor import handler.
 	 */
-	private static $excluded_post_types = array(
-		'attachment',
-		'wp_block',
-		'wp_template',
-		'wp_template_part',
-		'wp_global_styles',
-		'wp_navigation',
-		'wp_font_family',
-		'wp_font_face',
-	);
+	const IMPORT_ACTION = 'ayudawp_no_gutenberg_import_classic';
 
 	/**
 	 * Register the hooks
@@ -50,6 +44,16 @@ class AyudaWP_No_Gutenberg_Settings {
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
 		add_action( 'update_option_' . AyudaWP_No_Gutenberg_Options::OPTION_NAME, array( 'AyudaWP_No_Gutenberg_Status', 'flush_content_cache' ) );
+		add_action( 'admin_post_' . self::IMPORT_ACTION, array( __CLASS__, 'handle_classic_editor_import' ) );
+	}
+
+	/**
+	 * URL of the settings page
+	 *
+	 * @return string
+	 */
+	public static function page_url() {
+		return admin_url( 'options-general.php?page=' . AyudaWP_No_Gutenberg_Options::PAGE_SLUG );
 	}
 
 	/**
@@ -92,40 +96,51 @@ class AyudaWP_No_Gutenberg_Settings {
 			return;
 		}
 
-		// Progressive enhancement: without JavaScript every section stays
-		// visible and the explanatory notes still describe the behavior.
+		// Progressive enhancement, and nothing else: both notes are rendered
+		// with their real state from PHP, so the page says the same thing with
+		// JavaScript off. The script only keeps them in sync while boxes are
+		// ticked, and it never changes a checkbox, because a page that silently
+		// unticks what you are looking at cannot be trusted to save what it
+		// shows.
+		$ids = array();
+
+		foreach ( AyudaWP_No_Gutenberg_Options::content_dependent_items() as $item ) {
+			$ids[] = 'nogb-' . $item;
+		}
+
 		$script = sprintf(
 			'( function() {
 				var master = document.getElementById( "nogb-complete" );
-				var scope = document.getElementById( "nogb-scope" );
-				if ( ! master || ! scope ) {
-					return;
-				}
 				var risky = %1$s;
-				var hasBlockContent = %2$s;
-				var warned = false;
+				var atRisk = %2$s;
+				var riskyNote = document.getElementById( "nogb-risky-note" );
+				var masterNote = document.getElementById( "nogb-master-note" );
 				function sync() {
-					scope.hidden = master.checked;
-					if ( master.checked || warned || ! hasBlockContent ) {
+					if ( masterNote && master ) {
+						masterNote.hidden = ! master.checked;
+					}
+					if ( ! riskyNote ) {
 						return;
 					}
-					warned = true;
-					risky.forEach( function( id ) {
+					var checked = risky.some( function( id ) {
 						var box = document.getElementById( id );
-						if ( box ) {
-							box.checked = false;
-						}
+						return box && box.checked;
 					} );
-					var note = document.getElementById( "nogb-risky-note" );
-					if ( note ) {
-						note.hidden = false;
-					}
+					riskyNote.hidden = ! ( atRisk && checked );
 				}
-				master.addEventListener( "change", sync );
+				if ( master ) {
+					master.addEventListener( "change", sync );
+				}
+				risky.forEach( function( id ) {
+					var box = document.getElementById( id );
+					if ( box ) {
+						box.addEventListener( "change", sync );
+					}
+				} );
 				sync();
 			} )();',
-			wp_json_encode( array( 'nogb-frontend_css', 'nogb-theme_json' ) ),
-			wp_json_encode( AyudaWP_No_Gutenberg_Status::has_block_content() )
+			wp_json_encode( $ids ),
+			wp_json_encode( AyudaWP_No_Gutenberg_Options::content_needs_block_styles() )
 		);
 
 		wp_add_inline_script( 'common', $script );
@@ -193,13 +208,20 @@ class AyudaWP_No_Gutenberg_Settings {
 		?>
 		<div class="wrap nogb-settings">
 			<h1><?php echo esc_html__( 'No Gutenberg?', 'no-gutenberg' ); ?></h1>
+			<hr class="wp-header-end" />
+
+			<?php settings_errors(); ?>
+
+			<div class="nogb-page">
 
 			<?php
-			self::render_status_panel();
-
 			if ( $locked ) {
 				self::render_lock_notice();
 			}
+
+			self::render_classic_editor_import( $locked );
+
+			self::render_status_panel();
 			?>
 
 			<div class="nogb-layout">
@@ -214,7 +236,7 @@ class AyudaWP_No_Gutenberg_Settings {
 						<strong><?php echo esc_html__( 'Disable Gutenberg completely', 'no-gutenberg' ); ?></strong>
 					</label>
 					<p class="description">
-						<?php echo esc_html__( 'Everything, everywhere: the block editor for every post type and user, block widgets, patterns, frontend block assets, theme.json and the Site Editor. This is how the plugin has always worked and needs no further setup. Uncheck it to choose exactly what to disable.', 'no-gutenberg' ); ?>
+						<?php echo esc_html__( 'The block editor goes away for every post type, every user and every page template, so none of the rules below is needed. Uncheck it to disable the block editor only where you say. The items under "Site wide" are decided on their own, with this box checked or not.', 'no-gutenberg' ); ?>
 					</p>
 
 					<p class="nogb-guard">
@@ -233,6 +255,10 @@ class AyudaWP_No_Gutenberg_Settings {
 					<h2><?php echo esc_html__( 'Disable the block editor for...', 'no-gutenberg' ); ?></h2>
 					<p class="description">
 						<?php echo esc_html__( 'Rules are independent: anything that matches gets the Classic Editor. Leave every rule empty and the block editor stays available.', 'no-gutenberg' ); ?>
+					</p>
+
+					<p id="nogb-master-note" class="nogb-inline-note" <?php echo empty( $options['complete'] ) ? 'hidden' : ''; ?>>
+						<?php echo esc_html__( 'These rules are not in use while "Disable Gutenberg completely" is checked above. They stay on screen so you can see what is set, and they come into play the moment you uncheck it.', 'no-gutenberg' ); ?>
 					</p>
 
 					<?php if ( class_exists( 'WooCommerce' ) ) : ?>
@@ -264,14 +290,12 @@ class AyudaWP_No_Gutenberg_Settings {
 						</tbody>
 					</table>
 
-					<h2><?php echo esc_html__( 'Site wide', 'no-gutenberg' ); ?></h2>
+					<h2 class="nogb-section"><?php echo esc_html__( 'Site wide', 'no-gutenberg' ); ?></h2>
 					<p class="description">
 						<?php echo esc_html__( 'These belong to the whole site, not to a post type, so they are not affected by the rules above.', 'no-gutenberg' ); ?>
 					</p>
 
-					<p id="nogb-risky-note" class="nogb-inline-notice" hidden>
-						<?php echo esc_html__( 'Two options were unchecked for you: with the block editor still available somewhere, removing the block styles would leave that content unstyled on the frontend. Check them again if you know what you are doing.', 'no-gutenberg' ); ?>
-					</p>
+					<?php self::render_risk_note( $options ); ?>
 
 					<?php self::render_site_items( $options, $locked ); ?>
 				</div>
@@ -293,18 +317,28 @@ class AyudaWP_No_Gutenberg_Settings {
 			</aside>
 
 			</div><!-- .nogb-layout -->
+
+			</div><!-- .nogb-page -->
 		</div>
 		<?php
 	}
 
 	/**
 	 * Render the status panel
+	 *
+	 * It is a panel and not a notice on purpose: it is the permanent answer to
+	 * "what is this plugin doing to my site", it is read every time the page is
+	 * opened, and it is never dismissed. Dressing it as an admin notice made it
+	 * look like something that was about to go away.
 	 */
 	private static function render_status_panel() {
 		$rows = AyudaWP_No_Gutenberg_Status::get_rows();
 		?>
 		<div class="nogb-status">
-			<h2><?php echo esc_html__( 'What is happening on this site', 'no-gutenberg' ); ?></h2>
+			<h2>
+				<span class="dashicons dashicons-info" aria-hidden="true"></span>
+				<?php echo esc_html__( 'What is happening on this site', 'no-gutenberg' ); ?>
+			</h2>
 			<table class="nogb-status-table">
 				<tbody>
 					<?php foreach ( $rows as $row ) : ?>
@@ -330,10 +364,15 @@ class AyudaWP_No_Gutenberg_Settings {
 
 	/**
 	 * Render the notice shown when wp-config.php locks the settings
+	 *
+	 * Styled by this plugin instead of with the core notice classes, like every
+	 * other box on this page: core moves every div.notice to the top of the
+	 * screen (wp-admin/js/common.js:1090), which takes it out of the container
+	 * that gives this page a single width.
 	 */
 	private static function render_lock_notice() {
 		?>
-		<div class="notice notice-info nogb-lock-notice">
+		<div class="nogb-lock-notice">
 			<p>
 				<strong><?php echo esc_html__( 'Settings locked from wp-config.php', 'no-gutenberg' ); ?></strong>
 			</p>
@@ -345,6 +384,280 @@ class AyudaWP_No_Gutenberg_Settings {
 	}
 
 	/**
+	 * Render the warning about block content losing its styles
+	 *
+	 * The two items it talks about are the only ones in the page that can break
+	 * something that already works, so the warning is rendered from PHP with
+	 * the real state of the options and only hidden when there is nothing to
+	 * warn about. It is a warning and not an automatic correction: a page that
+	 * unticks boxes while you read it cannot be trusted to save what it shows.
+	 *
+	 * @param array $options Current options.
+	 */
+	private static function render_risk_note( $options ) {
+		if ( ! AyudaWP_No_Gutenberg_Options::content_needs_block_styles() ) {
+			return;
+		}
+
+		$checked = false;
+
+		foreach ( AyudaWP_No_Gutenberg_Options::content_dependent_items() as $item ) {
+			if ( ! empty( $options[ $item ] ) ) {
+				$checked = true;
+				break;
+			}
+		}
+		?>
+		<p id="nogb-risky-note" class="nogb-inline-notice" <?php echo $checked ? '' : 'hidden'; ?>>
+			<?php
+			if ( function_exists( 'wp_is_block_theme' ) && wp_is_block_theme() ) {
+				echo esc_html__( 'The active theme is a block theme, so everything it paints comes out of theme.json. With the two options below checked, the frontend of this site renders with no styles at all. Uncheck them, or move to a classic theme.', 'no-gutenberg' );
+			} else {
+				$stats = AyudaWP_No_Gutenberg_Status::block_content_stats();
+
+				printf(
+					/* translators: %d: number of entries built with blocks. */
+					esc_html( _n(
+						'This site has %d entry built with blocks. With the two options below checked, it renders on the frontend without any block styles: no layout, no colors, no spacing. The entry keeps the block editor, so its markup is safe, but what visitors see is not.',
+						'This site has %d entries built with blocks. With the two options below checked, they render on the frontend without any block styles: no layout, no colors, no spacing. The entries keep the block editor, so their markup is safe, but what visitors see is not.',
+						$stats['with_blocks'],
+						'no-gutenberg'
+					) ),
+					(int) $stats['with_blocks']
+				);
+			}
+			?>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Render the offer to reproduce a Classic Editor configuration
+	 *
+	 * @param bool $locked Whether the settings are read only.
+	 */
+	private static function render_classic_editor_import( $locked ) {
+		if ( $locked ) {
+			return;
+		}
+
+		$detected = AyudaWP_No_Gutenberg_Options::pending_classic_editor_import();
+
+		if ( ! $detected ) {
+			return;
+		}
+		?>
+		<div class="nogb-import">
+			<h2><?php echo esc_html__( 'This site was using Classic Editor', 'no-gutenberg' ); ?></h2>
+			<p><?php echo esc_html( self::classic_editor_summary( $detected ) ); ?></p>
+
+			<h3><?php echo esc_html__( 'What importing it would write', 'no-gutenberg' ); ?></h3>
+			<table class="nogb-import-table">
+				<tbody>
+					<?php foreach ( self::classic_editor_preview( $detected ) as $row ) : ?>
+					<tr>
+						<th scope="row"><?php echo esc_html( $row['label'] ); ?></th>
+						<td><?php echo esc_html( $row['value'] ); ?></td>
+					</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+
+			<p class="description">
+				<?php echo esc_html__( 'The per user preference of Classic Editor is not imported, because there is no equivalent here. You are asked once: Classic Editor deletes its own settings when it is uninstalled, so there would be nothing left to read later.', 'no-gutenberg' ); ?>
+			</p>
+			<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="post">
+				<input type="hidden" name="action" value="<?php echo esc_attr( self::IMPORT_ACTION ); ?>" />
+				<?php wp_nonce_field( self::IMPORT_ACTION ); ?>
+				<p>
+					<button type="submit" class="button button-primary" name="nogb-action" value="import"><?php echo esc_html__( 'Import these settings', 'no-gutenberg' ); ?></button>
+					<button type="submit" class="button" name="nogb-action" value="dismiss"><?php echo esc_html__( 'Keep my current settings', 'no-gutenberg' ); ?></button>
+				</p>
+			</form>
+		</div>
+		<?php
+	}
+
+	/**
+	 * What the import would write, line by line
+	 *
+	 * Built from the same classic_editor_equivalent() the handler stores, so
+	 * what is on screen is the configuration that is about to be saved and not
+	 * a description of it that can drift away from the code. Anything the
+	 * import erases is named here with what is in it today: the rules that
+	 * Classic Editor does not have are cleared, and that is the only part of
+	 * this that cannot be undone with a click.
+	 *
+	 * @param array $detected Configuration as Classic Editor had it.
+	 * @return array Rows of label and value.
+	 */
+	private static function classic_editor_preview( $detected ) {
+		$equivalent = AyudaWP_No_Gutenberg_Options::classic_editor_equivalent( $detected );
+		$current    = AyudaWP_No_Gutenberg_Options::get();
+		$labels     = self::get_item_labels();
+
+		$rows = array(
+			array(
+				'label' => __( 'Disable Gutenberg completely', 'no-gutenberg' ),
+				'value' => __( 'Unchecked. Classic Editor says it post type by post type, so that is what the rules below will do.', 'no-gutenberg' ),
+			),
+			array(
+				'label' => __( 'Classic Editor for', 'no-gutenberg' ),
+				'value' => self::post_type_list( $equivalent['disable_post_types'] ),
+			),
+			array(
+				'label' => __( 'Let each entry switch', 'no-gutenberg' ),
+				'value' => self::post_type_list( $equivalent['switch_post_types'] ),
+			),
+		);
+
+		$erased = array();
+
+		if ( $current['disable_roles'] ) {
+			$erased[] = sprintf(
+				/* translators: %d: number of user roles with a rule. */
+				_n( '%d user role', '%d user roles', count( $current['disable_roles'] ), 'no-gutenberg' ),
+				count( $current['disable_roles'] )
+			);
+		}
+
+		if ( $current['disable_templates'] ) {
+			$erased[] = sprintf(
+				/* translators: %d: number of page templates with a rule. */
+				_n( '%d page template', '%d page templates', count( $current['disable_templates'] ), 'no-gutenberg' ),
+				count( $current['disable_templates'] )
+			);
+		}
+
+		if ( $current['disable_ids'] ) {
+			$erased[] = sprintf(
+				/* translators: %d: number of individual entries with a rule. */
+				_n( '%d individual entry', '%d individual entries', count( $current['disable_ids'] ), 'no-gutenberg' ),
+				count( $current['disable_ids'] )
+			);
+		}
+
+		$rows[] = array(
+			'label' => __( 'User roles, page templates and entries', 'no-gutenberg' ),
+			'value' => $erased
+				? sprintf(
+					/* translators: %s: list of the rules that would be deleted, already formatted. */
+					__( 'Cleared, and you have rules there right now: %s. Classic Editor has nothing of the kind, so there is nothing to import into them.', 'no-gutenberg' ),
+					implode( ', ', $erased )
+				)
+				: __( 'Left empty, which is how they are now. Classic Editor has no rules of this kind.', 'no-gutenberg' ),
+		);
+
+		$unchecked = array();
+
+		foreach ( AyudaWP_No_Gutenberg_Options::content_dependent_items() as $item ) {
+			if ( ! empty( $current[ $item ] ) && empty( $equivalent[ $item ] ) ) {
+				$unchecked[] = $labels[ $item ]['label'];
+			}
+		}
+
+		$rows[] = array(
+			'label' => __( 'Site wide items', 'no-gutenberg' ),
+			'value' => $unchecked
+				? sprintf(
+					/* translators: %s: list of site wide items that would be unchecked, already formatted. */
+					__( 'Left as they are, except these, unchecked because this site has content built with blocks that needs them: %s', 'no-gutenberg' ),
+					implode( '; ', $unchecked )
+				)
+				: __( 'Left exactly as they are. Classic Editor has nothing to say about them.', 'no-gutenberg' ),
+		);
+
+		return $rows;
+	}
+
+	/**
+	 * Post type names of a list of slugs, ready to print
+	 *
+	 * @param array $slugs Post type slugs.
+	 * @return string
+	 */
+	private static function post_type_list( $slugs ) {
+		$names = array();
+
+		foreach ( $slugs as $slug ) {
+			$post_type = get_post_type_object( $slug );
+			$names[]   = $post_type ? $post_type->labels->name : $slug;
+		}
+
+		if ( ! $names ) {
+			return __( 'No post type', 'no-gutenberg' );
+		}
+
+		return implode( ', ', $names );
+	}
+
+	/**
+	 * One sentence saying what Classic Editor had configured
+	 *
+	 * The block editor cases get a second sentence, because reproducing them is
+	 * a reasonable thing to want and also the one import that can leave this
+	 * plugin with nothing to do. Saying it before the click is cheaper than a
+	 * support thread about a plugin that does nothing.
+	 *
+	 * @param array $detected Configuration as Classic Editor had it.
+	 * @return string
+	 */
+	private static function classic_editor_summary( $detected ) {
+		if ( 'classic' === $detected['replace'] ) {
+			return __( 'It opened everything in the Classic Editor and let each entry switch to the block editor. Here that is one rule per post type, plus the per entry switch on all of them.', 'no-gutenberg' );
+		}
+
+		if ( ! empty( $detected['allow'] ) ) {
+			return __( 'It opened everything in the block editor and let each entry switch to the Classic Editor. Reproducing that leaves this plugin with no rule disabling anything: the block editor stays, and the only way out is the per entry switch.', 'no-gutenberg' );
+		}
+
+		return __( 'It opened everything in the block editor, with no way to switch. Reproducing that leaves this plugin with nothing to disable, so you would probably rather keep what you have now and set your own rules.', 'no-gutenberg' );
+	}
+
+	/**
+	 * Apply or dismiss the Classic Editor import
+	 */
+	public static function handle_classic_editor_import() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You are not allowed to change these settings.', 'no-gutenberg' ), '', array( 'response' => 403 ) );
+		}
+
+		check_admin_referer( self::IMPORT_ACTION );
+
+		$action   = isset( $_POST['nogb-action'] ) ? sanitize_text_field( wp_unslash( $_POST['nogb-action'] ) ) : '';
+		$detected = AyudaWP_No_Gutenberg_Options::pending_classic_editor_import();
+
+		if ( 'import' === $action && $detected && ! AyudaWP_No_Gutenberg_Options::is_locked() ) {
+			update_option(
+				AyudaWP_No_Gutenberg_Options::OPTION_NAME,
+				AyudaWP_No_Gutenberg_Options::classic_editor_equivalent( $detected )
+			);
+
+			add_settings_error(
+				AyudaWP_No_Gutenberg_Options::OPTION_GROUP,
+				'nogb-imported',
+				__( 'The Classic Editor configuration was reproduced. Check it below before you leave this page.', 'no-gutenberg' ),
+				'success'
+			);
+		} else {
+			add_settings_error(
+				AyudaWP_No_Gutenberg_Options::OPTION_GROUP,
+				'nogb-dismissed',
+				__( 'Nothing was changed, and the Classic Editor configuration will not be offered again.', 'no-gutenberg' ),
+				'info'
+			);
+		}
+
+		AyudaWP_No_Gutenberg_Options::forget_classic_editor_import();
+		AyudaWP_No_Gutenberg_Options::flush_cache();
+
+		set_transient( 'settings_errors', get_settings_errors(), 30 );
+
+		wp_safe_redirect( add_query_arg( 'settings-updated', 'true', self::page_url() ) );
+		exit;
+	}
+
+	/**
 	 * Render the post types checklist
 	 *
 	 * @param array $options Current options.
@@ -353,7 +666,6 @@ class AyudaWP_No_Gutenberg_Settings {
 	private static function render_post_types_field( $options, $locked ) {
 		$disable_name = AyudaWP_No_Gutenberg_Options::OPTION_NAME . '[disable_post_types][]';
 		$switch_name  = AyudaWP_No_Gutenberg_Options::OPTION_NAME . '[switch_post_types][]';
-		$post_types   = get_post_types( array( 'show_ui' => true ), 'objects' );
 		?>
 		<table class="nogb-matrix">
 			<thead>
@@ -365,12 +677,10 @@ class AyudaWP_No_Gutenberg_Settings {
 			</thead>
 			<tbody>
 				<?php
-				foreach ( $post_types as $post_type ) {
-					if ( in_array( $post_type->name, self::$excluded_post_types, true ) ) {
-						continue;
-					}
+				foreach ( AyudaWP_No_Gutenberg_Options::manageable_post_types() as $slug ) {
+					$post_type = get_post_type_object( $slug );
 
-					if ( ! post_type_supports( $post_type->name, 'editor' ) ) {
+					if ( ! $post_type ) {
 						continue;
 					}
 

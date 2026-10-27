@@ -1,7 +1,23 @@
-No Gutenberg - Choose Where to Use the Block Editor or the Classic Editor — Full changelog
+No Gutenberg? - Choose Where to Use the Block Editor or the Classic Editor — Full changelog
 
 For each release, see the entries below. The latest version is always at the top.
 The current release notes also live in readme.txt under "== Changelog ==".
+
+= 2.4.0 =
+* New: A Classic Editor configuration found on the site can be imported here. The page says what was found and then lists, line by line, what importing it would write and what it would clear, with a button to keep the settings you already have. It is offered once, because Classic Editor deletes its own settings when it is removed
+* New: A warning when Classic Editor is running at the same time as this plugin. Both of them choose which editor opens, through the same WordPress filters, and the one that runs last wins
+* Improved: The whole configuration is on screen at all times. The master switch used to hide the rest of the page, which read as there being nothing left to decide while two of the hidden settings could take the styles off content that was already published
+* Improved: The site wide items are decided on their own, with the master switch checked or not. A complete disable used to force every one of them on, so the two that reach the frontend could not be turned off on a site with block content, and saving the page put them back
+* Improved: A warning next to the site wide items whenever the block styles are being removed from a site that needs them, with the number of entries it affects
+* Improved: The settings page now confirms when settings are saved, which it never did
+* Improved: The settings page was laid out again. Every box on it ends on the same pixel, and what the plugin is doing to the site is a panel that belongs there, instead of looking like a notice waiting to be dismissed
+* Fix: Installing on a site that already has content built with blocks no longer removes the block CSS and neutralizes theme.json. Those entries kept the block editor, so their markup was safe, but visitors saw them with no styles, no layout and no spacing presets. Both options now start unchecked on a site with block content or a block theme, and the page says why
+* Fix: The activation notice said that block content would keep the block editor so nothing would break its markup, while the same configuration had just taken its styles off the frontend. It now also says what was left in place, and why
+* Fix: The status panel reported the frontend block assets and theme.json as removed whenever the master switch was checked, whatever the real setting said
+* Fix: Activating the plugin for a whole network configured only the site the network administrator was on. Every other site of that network was treated as one coming from before 2.3.0, so it ended up with the protection of existing block content off and the block styles removed from the frontend. Each of them now gets the defaults of its own site the first time its admin is opened. This is about networks activated from this version on: on a network that was already activated, every site keeps what it has
+* Fix: Updating gives the block styles back to a site that has content built with blocks and was serving it with none. Until this version the master switch forced the frontend block assets and the theme.json item on while it was checked, so on those sites nobody chose that: the stored value could not even be read back, and the settings page showed a state that was not the real one. A site that had the master switch unchecked did choose, so its two values are left exactly as they are and the settings page warns about them instead
+* Fix: A site with no configuration of its own, which is what a site of a network activation has until somebody opens its admin there, no longer removes the block styles while it waits. Nothing has looked at whether that site needs them yet, and removing them is the half that cannot be undone by reading the page
+* Fix: Uninstall also removes the stored Classic Editor detection
 
 = 2.3.2 =
 * Fix: Sites running Divi 5 got a fatal error on every frontend page. Removing the block widgets from the classic Widgets screen unregistered the Block widget itself, and Divi asks WordPress for it while deciding which stylesheets a page needs. The classic Widgets screen is restored the same way as before, without touching the widget

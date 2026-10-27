@@ -20,7 +20,7 @@ class AyudaWP_No_Gutenberg {
 	/**
 	 * Plugin version
 	 */
-	const VERSION = '2.3.2';
+	const VERSION = '2.4.0';
 
 	/**
 	 * Initialize the plugin

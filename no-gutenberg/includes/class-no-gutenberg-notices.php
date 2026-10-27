@@ -31,6 +31,7 @@ class AyudaWP_No_Gutenberg_Notices {
 	public static function init() {
 		add_action( 'admin_notices', array( __CLASS__, 'activation_notice' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'fse_theme_warning' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'classic_editor_conflict_notice' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_dismiss_script' ) );
 		add_action( 'wp_ajax_ayudawp_dismiss_fse_warning', array( __CLASS__, 'handle_dismiss_fse_warning' ) );
 
@@ -63,13 +64,13 @@ class AyudaWP_No_Gutenberg_Notices {
 
 		echo '<div class="notice notice-success is-dismissible">';
 		echo '<p><strong>' . esc_html__( 'No Gutenberg? activated successfully!', 'no-gutenberg' ) . '</strong> ';
-		echo esc_html__( 'Gutenberg Block Editor, FSE features, and all block-related assets have been completely disabled. Welcome back to the Classic Editor!', 'no-gutenberg' );
+		echo esc_html__( 'The Classic Editor is back, and the block widgets, the block patterns and the Site Editor are gone. Welcome back!', 'no-gutenberg' );
 		echo '</p>';
 
 		echo '<p>';
 		printf(
-			/* translators: %s: link to the plugin settings page, with "Settings" as its text. */
-			esc_html__( 'Everything is disabled out of the box. If you need to keep the block editor for some post types or user roles, review the %s.', 'no-gutenberg' ),
+			/* translators: %s: link to the plugin settings page, with "settings page" as its text. */
+			esc_html__( 'It works with no setup. Everything it decided for this site is on one screen, and so is how to change it: the %s.', 'no-gutenberg' ),
 			'<a href="' . esc_url( admin_url( 'options-general.php?page=' . AyudaWP_No_Gutenberg_Options::PAGE_SLUG ) ) . '">' . esc_html__( 'settings page', 'no-gutenberg' ) . '</a>'
 		);
 		echo '</p>';
@@ -106,6 +107,8 @@ class AyudaWP_No_Gutenberg_Notices {
 		$stats = AyudaWP_No_Gutenberg_Status::block_content_stats();
 
 		if ( $stats['with_blocks'] < 1 ) {
+			self::block_styles_paragraph();
+
 			return;
 		}
 
@@ -130,6 +133,61 @@ class AyudaWP_No_Gutenberg_Notices {
 		}
 
 		echo '</p>';
+
+		self::block_styles_paragraph();
+	}
+
+	/**
+	 * Say that the block styles were left alone, and why
+	 *
+	 * The editor protection has never been the whole story. An entry built with
+	 * blocks keeps the block editor, so its markup is safe, but the same
+	 * configuration used to take the block CSS and theme.json out of the
+	 * frontend, and that content rendered with no styles for every visitor.
+	 * The install no longer does that, and saying it here is the point: a
+	 * notice that reassures about half of the problem is worse than silence.
+	 */
+	private static function block_styles_paragraph() {
+		if ( ! AyudaWP_No_Gutenberg_Options::content_needs_block_styles() ) {
+			return;
+		}
+
+		$options = AyudaWP_No_Gutenberg_Options::get();
+
+		foreach ( AyudaWP_No_Gutenberg_Options::content_dependent_items() as $item ) {
+			if ( ! empty( $options[ $item ] ) ) {
+				return;
+			}
+		}
+
+		echo '<p>';
+		echo esc_html__( 'The block styles are still being served on the frontend, and theme.json is still being read, because this site needs them to render what it already has. Removing them is two checkboxes away, under "Site wide" on the settings page, which also says what it breaks.', 'no-gutenberg' );
+		echo '</p>';
+	}
+
+	/**
+	 * Warn when Classic Editor is running at the same time
+	 *
+	 * Two plugins answering use_block_editor_for_post with their own rules, and
+	 * whichever runs last decides. Neither is disabled automatically, because
+	 * which one to keep is not a decision this plugin gets to make.
+	 */
+	public static function classic_editor_conflict_notice() {
+		if ( ! current_user_can( 'activate_plugins' ) || ! AyudaWP_No_Gutenberg_Options::classic_editor_active() ) {
+			return;
+		}
+
+		$screen  = get_current_screen();
+		$screens = array( 'plugins', 'settings_page_' . AyudaWP_No_Gutenberg_Options::PAGE_SLUG );
+
+		if ( ! $screen || ! in_array( $screen->id, $screens, true ) ) {
+			return;
+		}
+
+		echo '<div class="notice notice-warning">';
+		echo '<p><strong>' . esc_html__( 'Classic Editor is active at the same time as No Gutenberg?', 'no-gutenberg' ) . '</strong></p>';
+		echo '<p>' . esc_html__( 'Both plugins choose which editor opens, through the same WordPress filters, and the one that runs last wins. Nothing has been disabled for you: deactivate one of the two so that the editor you get is the one you configured.', 'no-gutenberg' ) . '</p>';
+		echo '</div>';
 	}
 
 	/**

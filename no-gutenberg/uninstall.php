@@ -15,6 +15,14 @@ defined( 'WP_UNINSTALL_PLUGIN' ) || die( 'No script kiddies please!' );
 // Plugin settings.
 delete_option( 'ayudawp_no_gutenberg_options' );
 delete_option( 'ayudawp_no_gutenberg_version' );
+delete_option( 'ayudawp_no_gutenberg_classic_editor' );
+
+// Mark left on the network by a network wide activation. WordPress runs this
+// file once, so the options above are those of the site it runs on, but this
+// one belongs to the whole network and would survive the uninstall.
+if ( is_multisite() ) {
+	delete_site_option( 'ayudawp_no_gutenberg_network_install' );
+}
 
 // Dismissed FSE warning, for every user.
 delete_metadata( 'user', 0, 'ayudawp_no_gutenberg_fse_warning_dismissed', '', true );

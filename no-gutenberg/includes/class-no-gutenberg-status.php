@@ -197,6 +197,21 @@ class AyudaWP_No_Gutenberg_Status {
 			);
 		}
 
+		// Protecting the editor says nothing about what visitors see, and that
+		// is the half of the answer this panel used to leave out.
+		if ( $content['with_blocks'] > 0 ) {
+			$stripped = AyudaWP_No_Gutenberg_Options::item_enabled( 'frontend_css' )
+				|| AyudaWP_No_Gutenberg_Options::item_enabled( 'theme_json' );
+
+			$rows[] = array(
+				'label' => __( 'How that content renders', 'no-gutenberg' ),
+				'value' => $stripped
+					? __( 'With no block styles: the frontend CSS it needs is being removed', 'no-gutenberg' )
+					: __( 'With its block styles, the way visitors have always seen it', 'no-gutenberg' ),
+				'tone'  => $stripped ? 'on' : 'info',
+			);
+		}
+
 		return $rows;
 	}
 
@@ -291,7 +306,10 @@ class AyudaWP_No_Gutenberg_Status {
 
 		// There is no WordPress API to count how many entries contain blocks,
 		// so this needs a direct query. It is cached in a transient for 12
-		// hours and only runs on the plugin settings screen.
+		// hours. It runs on the settings screen, and also when this plugin
+		// writes the configuration of a site for the first time, which happens
+		// on activation and, for a site of a network activation, on the first
+		// admin screen somebody opens there.
 		//
 		// Every status that shows up in the entries lists counts, not only the
 		// published ones: a site in the middle of a migration keeps its block

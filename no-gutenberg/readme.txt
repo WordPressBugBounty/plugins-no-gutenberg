@@ -4,7 +4,7 @@ Tags: gutenberg, classic editor, FSE, blocks, woocommerce
 Requires at least: 6.1
 Requires PHP: 7.4
 Tested up to: 7.1
-Stable tag: 2.3.2
+Stable tag: 2.4.0
 License: GPLv2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ Decide where the block editor stays and where the Classic Editor comes back. It 
 
 == Description ==
 
-The most configurable way to leave the block editor behind. Activate it and everything block related is gone: the block editor, Global Styles, patterns, block widgets, the Site Editor and the block CSS and JavaScript that every page loads. From there you decide the scope: everywhere, or only for the post types, roles, templates and entries you choose.
+The most configurable way to leave the block editor behind. Activate it and the block editor is gone, along with Global Styles, patterns, block widgets and the Site Editor. From there you decide the scope: everywhere, or only for the post types, roles, templates and entries you choose. If the site already has content built with blocks, the block CSS it needs stays in place and the plugin tells you so, instead of leaving that content unstyled.
 
 **What this plugin removes:**
 
@@ -68,6 +68,8 @@ define( 'NO_GUTENBERG_OPTIONS', array( 'complete' => true ) );
 define( 'NO_GUTENBERG_HIDE_SETTINGS', true );
 `
 
+complete covers the block editor, everywhere and for everyone. It does not decide the site wide items, which answer for themselves: a site that is already serving the block styles because it has content built with blocks keeps serving them. Name them in the array if you want them off whatever the site has.
+
 Drop that second line and the settings page is still there, showing the configuration the site is really running, but read only. And if all you want is to lock the screen, leaving the configuration as each site has it stored:
 
 `
@@ -88,7 +90,7 @@ define(
 );
 `
 
-The keys are the settings on the screen. complete, widgets, patterns, frontend_css, theme_json, site_editor and fse_notices take true or false, while disable_post_types, disable_roles, disable_templates and switch_post_types take an array of slugs, and disable_ids an array of entry IDs. Any key you leave out keeps the value stored on the site. Note that defining NO_GUTENBERG_OPTIONS already turns the whole screen read only, so NO_GUTENBERG_LOCK_SETTINGS is not needed on top of it.
+The keys are the settings on the screen. complete, widgets, patterns, frontend_css, theme_json, site_editor and fse_notices take true or false, while disable_post_types, disable_roles, disable_templates and switch_post_types take an array of slugs, and disable_ids an array of entry IDs. Any key you leave out keeps the value stored on the site, and on a site with block content frontend_css and theme_json are stored as false, so write them here if you really want them on. Note that defining NO_GUTENBERG_OPTIONS already turns the whole screen read only, so NO_GUTENBERG_LOCK_SETTINGS is not needed on top of it.
 
 It fits sites that:
 - Work better in the Classic Editor and want it back
@@ -179,34 +181,30 @@ Because it does not stop at the editor. Others disable the block editor and leav
 
 == Changelog ==
 
-= 2.3.2 =
-* Fix: Sites running Divi 5 got a fatal error on every frontend page. Removing the block widgets from the classic Widgets screen unregistered the Block widget itself, and Divi asks WordPress for it while deciding which stylesheets a page needs. The classic Widgets screen is restored the same way as before, without touching the widget
-* Fix: Block widgets already saved on a site stopped being rendered on the frontend and disappeared from the Widgets screen. Nothing was lost, they are back on update, but do not save the Widgets screen while running 2.3.1
-* Fix: Removed a filter removal that never did anything: the callback it named was never part of WordPress
-* Fix: The status panel said "1 still added by other plugins" when a single pattern was left, and gave translators two identical plural forms
+= 2.4.0 =
+If this plugin was taking the block styles off a site that has content built with blocks, updating puts them back: that was never a choice, the old code forced it. A new install does not make that choice either, and every setting is now on screen.
 
-= 2.3.1 =
-* Improved: Tested up to WordPress 7.1, with no changes needed. The always iframed post editor, the persistent toolbar and the new client-side media processing headers only reach the block editor, and the Site Editor, Patterns and Fonts screens this plugin removes keep the same slugs
-* Improved: The plugin calls itself No Gutenberg? everywhere now, the same name it has on WordPress.org, instead of No Gutenberg in the plugins list, the Settings menu, its settings screen and its notices
-* Fix: Pages were loading the block styles and scripts of every plugin that registers blocks, even where no block appears. Removing the block CSS also turned off the on-demand loading that WordPress 6.8 tied to the same switch, so on a site with block plugins installed this plugin was adding weight instead of saving it
-* Fix: The Block widget is now really gone from the classic Widgets screen. The cleanup ran after WordPress had already registered it, so it stayed on the list
-
-= 2.3.0 =
-* New: Existing block content is protected. An entry that already contains blocks keeps the block editor whatever the rules say, so installing the plugin on a site with mixed content no longer sends that content to an editor that reflows its markup. A checkbox under the master switch gives the protection up when you really want the Classic Editor on everything
-* New: The entries list says which editor each entry opens with, and flags the entries built with blocks that are opening in the Classic Editor. A "Built with blocks" link next to All and Published narrows the list down to them, so you can finally see which entries they are instead of only how many
-* New: The Classic Editor warns you when the entry you are editing is built with blocks, before you save it, with a link to open it in the block editor instead
-* Improved: The editor chosen for a single entry is now honored whatever the configuration is, master switch included. It used to be read only where per entry switching was enabled, which left no way out on a site with everything disabled
-* Improved: Sites arriving from the Classic Editor plugin keep the editor it recorded for each entry, instead of starting from zero
-* Improved: The status panel counts drafts, pending, private and scheduled entries too, not only published ones, and links to the entries it is counting. A site in the middle of a migration was being told it had no block content
-* Improved: The activation notice says how many entries are built with blocks and what is going to happen to them
-* Fix: Uninstall now also removes the version option, the per entry editor meta and the content count transients
+* New: A Classic Editor configuration found on the site can be imported here. The page says what was found and then lists, line by line, what importing it would write and what it would clear, with a button to keep the settings you already have. It is offered once, because Classic Editor deletes its own settings when it is removed
+* New: A warning when Classic Editor is running at the same time as this plugin. Both of them choose which editor opens, through the same WordPress filters, and the one that runs last wins
+* Improved: The whole configuration is on screen at all times. The master switch used to hide the rest of the page, which read as there being nothing left to decide while two of the hidden settings could take the styles off content that was already published
+* Improved: The site wide items are decided on their own, with the master switch checked or not. A complete disable used to force every one of them on, so the two that reach the frontend could not be turned off on a site with block content, and saving the page put them back
+* Improved: A warning next to the site wide items whenever the block styles are being removed from a site that needs them, with the number of entries it affects
+* Improved: The settings page now confirms when settings are saved, which it never did
+* Improved: The settings page was laid out again. Every box on it ends on the same pixel, and what the plugin is doing to the site is a panel that belongs there, instead of looking like a notice waiting to be dismissed
+* Fix: Installing on a site that already has content built with blocks no longer removes the block CSS and neutralizes theme.json. Those entries kept the block editor, so their markup was safe, but visitors saw them with no styles, no layout and no spacing presets. Both options now start unchecked on a site with block content or a block theme, and the page says why
+* Fix: The activation notice said that block content would keep the block editor so nothing would break its markup, while the same configuration had just taken its styles off the frontend. It now also says what was left in place, and why
+* Fix: The status panel reported the frontend block assets and theme.json as removed whenever the master switch was checked, whatever the real setting said
+* Fix: Activating the plugin for a whole network configured only the site the network administrator was on. Every other site of that network was treated as one coming from before 2.3.0, so it ended up with the protection of existing block content off and the block styles removed from the frontend. Each of them now gets the defaults of its own site the first time its admin is opened. This is about networks activated from this version on: on a network that was already activated, every site keeps what it has
+* Fix: Updating gives the block styles back to a site that has content built with blocks and was serving it with none. Until this version the master switch forced the frontend block assets and the theme.json item on while it was checked, so on those sites nobody chose that: the stored value could not even be read back, and the settings page showed a state that was not the real one. A site that had the master switch unchecked did choose, so its two values are left exactly as they are and the settings page warns about them instead
+* Fix: A site with no configuration of its own, which is what a site of a network activation has until somebody opens its admin there, no longer removes the block styles while it waits. Nothing has looked at whether that site needs them yet, and removing them is the half that cannot be undone by reading the page
+* Fix: Uninstall also removes the stored Classic Editor detection
 
 For older changelog entries, please check the [changelog.txt](https://plugins.svn.wordpress.org/no-gutenberg/trunk/changelog.txt) file
 
 == Upgrade Notice ==
 
-= 2.3.2 =
-Fixes a fatal error on every frontend page of sites running Divi 5, and restores the block widgets that 2.3.1 stopped rendering. Nothing was lost: they come back on update. If you are on 2.3.1, update before saving the Widgets screen.
+= 2.4.0 =
+If this plugin was taking the block styles off a site that has content built with blocks, updating puts them back: that was never a choice, the old code forced it. A new install does not make that choice either, and every setting is now on screen.
 
 == Support ==
 
